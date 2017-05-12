@@ -1,0 +1,93 @@
+% For more information about UPmethodology: https://www.ctan.org/pkg/upmethodology
+
+%=======================================================================================================
+%=============================================== Informations ==========================================
+%=======================================================================================================
+
+%%% Document Information and Declaration
+\declaredocument{Simulation d'un système de livraison par drone}{Projet de LO41}{UTBM\_LO41\_DroneDeliverySystem\_P17}
+
+%%% Abstract and Key-words
+\setdocabstract[french]{Projet UTBM de l'UV LO41 du semestre de printemps 2017}
+\setdockeywords[french]{UTBM, LO41, drone, delivery, system}
+
+%%% Document Authors and Validators
+\addauthorvalidator*[jerome.boulmier@utbm.fr]{Jérôme}{Boulmier}{Étudiant en INFO02}
+\addauthorvalidator*[maxime.pinard@utbm.fr]{Maxime}{Pinard}{Étudiant en INFO02}
+
+%%% Informed People
+\addinformed*[philippe.descamps@utbm.fr]{Philippe}{Descamps}{Professeur de l'UV LO41}
+
+%%% Copyright and Publication Information
+\setcopyrighter{Jérôme Boulmier et Maxime Pinard}
+\setpublisher{Jérôme Boulmier et Maxime Pinard}
+\setprintingaddress{France}
+
+%%% Version
+\incversion{\makedate{\the\day}{\the\month}{\the\year}}{Initial version.}{\upmpublic}
+
+%=======================================================================================================
+%================================================== Configs ============================================
+%=======================================================================================================
+
+% Change Front Page Layout
+%\setfrontcover{modern} % modern or classic
+
+% Change Illustration Picture
+%\setfrontillustration[1.3]{figures/figure}
+
+% Source code formatting
+\upmcodelang{cpp} % uml, java or cpp
+
+% Prevent page breaks in paragraphs
+\predisplaypenalty=1000
+\postdisplaypenalty=1000
+\clubpenalty=1000
+
+% Minimal space required in the bottom margin not to move the title on the next page
+%\renewcommand{\bottomtitlespace}{.1\textheight}
+
+% Links config, especialy for the table of contents
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue,
+    linktoc=all
+}
+
+% French language config
+\frenchbsetup{StandardLayout=true,ReduceListSpacing=false,CompactItemize=false}
+
+%=======================================================================================================
+%================================================= Functions ===========================================
+%=======================================================================================================
+
+%Paragraph with line break
+\newcommand{\p}[1]{\paragraph{#1\\}}
+
+% Function to print a warning sign
+\newcommand{\dangersign}[1][2.5ex]
+	{\renewcommand{\stacktype}{L}
+		{\scaleto{\stackon[1pt]{\color{red}$\triangle$}{\fontsize{4pt}{4pt}\selectfont !}}{#1}}}
+
+% Definition of some dt/dx/dy shortcuts for integrals
+\newcommand{\dt}
+{\;\mathrm{d}\,t}
+
+\newcommand{\dx}
+{\;\mathrm{d}\,x}
+
+\newcommand{\dy}
+{\;\mathrm{d}\,y}
+
+% Definition of \Witem for 'itemize' environment with a warning sign
+\newcommand{\Witem}
+{\item[\dangersign{}]}
+
+% Definition of a Max function shortcut
+\newcommand{\Max}[2][ ]
+{\underset{#1}{\text{Max}}\,#2}
+
+% Definition of a Min function shortcut
+\newcommand{\Min}[2][ ]
+{\underset{#1}{\text{Min}}\,#2}
