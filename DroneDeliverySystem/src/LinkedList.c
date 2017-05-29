@@ -18,14 +18,12 @@
 //                                                                             //
 /////////////////////////////////////////////////////////////////////////////////
 
-#include <log.h>
-#include <util/LinkedList.h>
+#include <LinkedList.h>
 
 ////////////////////////////////////////////////////////////
-List* createList(size_t elementSize) {
-	List* list = (List*) malloc(sizeof(List));
-	list->valueSize = elementSize;
-	list->sentinel = (ListNode*) malloc(sizeof(ListNode));
+LinkedList* ll_createList() {
+	LinkedList* list = (LinkedList*) malloc(sizeof(LinkedList));
+	list->sentinel = (LinkedListNode*) malloc(sizeof(LinkedListNode));
 	list->sentinel->next = list->sentinel;
 	list->sentinel->previous = list->sentinel;
 	list->size = 0;
@@ -33,9 +31,9 @@ List* createList(size_t elementSize) {
 }
 
 ////////////////////////////////////////////////////////////
-void deleteList(List* list) {
-	ListNode* tmpNode = list->sentinel->next;
-	while (tmpNode != list->sentinel) {
+void ll_deleteList(LinkedList* list) {
+	LinkedListNode* tmpNode = list->sentinel->next;
+	while(tmpNode != list->sentinel) {
 		tmpNode = tmpNode->next;
 		free(tmpNode->previous->value);
 		free(tmpNode->previous);
@@ -45,18 +43,18 @@ void deleteList(List* list) {
 }
 
 ////////////////////////////////////////////////////////////
-bool isEmpty(List* list) {
+bool ll_isEmpty(LinkedList* list) {
 	return !(list->size);
 }
 
 ////////////////////////////////////////////////////////////
-size_t getSize(List* list) {
+unsigned int ll_getSize(LinkedList* list) {
 	return list->size;
 }
 
 ////////////////////////////////////////////////////////////
-void insertFirst(List* list, void* element) {
-	ListNode* newNode = (ListNode*) malloc(sizeof(ListNode));
+void ll_insertFirst(LinkedList* list, void* element) {
+	LinkedListNode* newNode = (LinkedListNode*) malloc(sizeof(LinkedListNode));
 	newNode->value = element;
 	newNode->previous = list->sentinel;
 	newNode->next = list->sentinel->next;
@@ -66,8 +64,8 @@ void insertFirst(List* list, void* element) {
 }
 
 ////////////////////////////////////////////////////////////
-void insertLast(List* list, void* element) {
-	ListNode* newNode = (ListNode*) malloc(sizeof(ListNode));
+void ll_insertLast(LinkedList* list, void* element) {
+	LinkedListNode* newNode = (LinkedListNode*) malloc(sizeof(LinkedListNode));
 	newNode->value = element;
 	newNode->previous = list->sentinel->previous;
 	newNode->next = list->sentinel;
@@ -77,10 +75,10 @@ void insertLast(List* list, void* element) {
 }
 
 ////////////////////////////////////////////////////////////
-void insertElement(List* list, size_t elementPosition, void* element) {
-	ListNode* listNode = getListNode(list, elementPosition);
-	if (listNode) {
-		ListNode* newNode = (ListNode*) malloc(sizeof(ListNode));
+void ll_insertElement(LinkedList* list, unsigned int elementPosition, void* element) {
+	LinkedListNode* listNode = ll_getListNode(list, elementPosition);
+	if(listNode) {
+		LinkedListNode* newNode = (LinkedListNode*) malloc(sizeof(LinkedListNode));
 		newNode->value = element;
 		newNode->next = listNode;
 		newNode->previous = listNode->previous;
@@ -89,14 +87,14 @@ void insertElement(List* list, size_t elementPosition, void* element) {
 		++list->size;
 	}
 	else {
-		insertLast(list, element);
+		ll_insertLast(list, element);
 	}
 }
 
 ////////////////////////////////////////////////////////////
-bool removeFirst(List* list) {
-	if (list->size) {
-		ListNode* listNode = list->sentinel->next;
+bool ll_removeFirst(LinkedList* list) {
+	if(list->size) {
+		LinkedListNode* listNode = list->sentinel->next;
 		list->sentinel->next = listNode->next;
 		listNode->next->previous = list->sentinel;
 		free(listNode->value);
@@ -104,14 +102,14 @@ bool removeFirst(List* list) {
 		--list->size;
 		return true;
 	}
-	LOG("Try to delete first element of an empty list");
+	SLOG_WARN("Try to delete first element of an empty list");
 	return false;
 }
 
 ////////////////////////////////////////////////////////////
-bool removeLast(List* list) {
-	if (list->size) {
-		ListNode* listNode = list->sentinel->previous;
+bool ll_removeLast(LinkedList* list) {
+	if(list->size) {
+		LinkedListNode* listNode = list->sentinel->previous;
 		list->sentinel->previous = listNode->previous;
 		listNode->previous->next = list->sentinel;
 		free(listNode->value);
@@ -119,14 +117,14 @@ bool removeLast(List* list) {
 		--list->size;
 		return true;
 	}
-	LOG("Try to delete last element of an empty list");
+	SLOG_WARN("Try to delete last element of an empty list");
 	return false;
 }
 
 ////////////////////////////////////////////////////////////
-bool removeElement(List* list, size_t elementPosition) {
-	ListNode* listNode = getListNode(list, elementPosition);
-	if (listNode) {
+bool ll_removeElement(LinkedList* list, unsigned int elementPosition) {
+	LinkedListNode* listNode = ll_getListNode(list, elementPosition);
+	if(listNode) {
 		listNode->previous->next = listNode->next;
 		listNode->next->previous = listNode->previous;
 		free(listNode->value);
@@ -134,50 +132,46 @@ bool removeElement(List* list, size_t elementPosition) {
 		--list->size;
 		return true;
 	}
-	char msg[100];
-	sprintf(msg, "Try to delete element %zu in list of size %zu",elementPosition,list->size);
-	LOG(msg);
+	LOG_WARN("Try to delete element %u in list of size %u", elementPosition, list->size);
 	return false;
 }
 
 ////////////////////////////////////////////////////////////
-void* getFirst(List* list) {
+void* ll_getFirst(LinkedList* list) {
 	return list->sentinel->next->value;
 }
 
 ////////////////////////////////////////////////////////////
-void* getLast(List* list) {
+void* ll_getLast(LinkedList* list) {
 	return list->sentinel->previous->value;
 }
 
 ////////////////////////////////////////////////////////////
-void* getElement(List* list, size_t elementPosition) {
-	ListNode* listNode = getListNode(list, elementPosition);
-	if (listNode) {
+void* ll_getElement(LinkedList* list, unsigned int elementPosition) {
+	LinkedListNode* listNode = ll_getListNode(list, elementPosition);
+	if(listNode) {
 		return listNode->value;
 	}
-	char msg[100];
-	sprintf(msg, "Try to get element %zu in list of size %zu",elementPosition,list->size);
-	LOG(msg);
+	LOG_WARN("Try to get element %u in list of size %u", elementPosition, list->size);
 	return NULL;
 }
 
 ////////////////////////////////////////////////////////////
-bool contains(List* list, void* element, int (* compare)(void*, void*)) {
+bool ll_contains(LinkedList* list, void* element, int (* compare)(void*, void*)) {
 	list->sentinel->value = element;
-	ListNode* tmpNode = list->sentinel->next;
-	while ((*compare)(tmpNode->value, element)) {
+	LinkedListNode* tmpNode = list->sentinel->next;
+	while((*compare)(tmpNode->value, element)) {
 		tmpNode = tmpNode->next;
 	}
 	return (tmpNode != list->sentinel);
 }
 
 ////////////////////////////////////////////////////////////
-unsigned int getElementPosition(List* list, void* element, int (* compare)(void*, void*)) {
+unsigned int ll_getElementPosition(LinkedList* list, void* element, int (* compare)(void*, void*)) {
 	list->sentinel->value = element;
-	ListNode* tmpNode = list->sentinel->next;
+	LinkedListNode* tmpNode = list->sentinel->next;
 	unsigned int i = 0;
-	while ((*compare)(tmpNode->value, element)) {
+	while((*compare)(tmpNode->value, element)) {
 		tmpNode = tmpNode->next;
 		++i;
 	}
@@ -185,10 +179,10 @@ unsigned int getElementPosition(List* list, void* element, int (* compare)(void*
 }
 
 ////////////////////////////////////////////////////////////
-ListNode* getListNode(List* list, size_t listElementPosition) {
-	if (listElementPosition < list->size) {
-		ListNode* tmpNode = list->sentinel->next;
-		for (size_t i = listElementPosition; i--;) {
+LinkedListNode* ll_getListNode(LinkedList* list, unsigned int listElementPosition) {
+	if(listElementPosition < list->size) {
+		LinkedListNode* tmpNode = list->sentinel->next;
+		for(unsigned int i = listElementPosition; i--;) {
 			tmpNode = tmpNode->next;
 		}
 		return tmpNode;
@@ -197,56 +191,58 @@ ListNode* getListNode(List* list, size_t listElementPosition) {
 }
 
 ////////////////////////////////////////////////////////////
-ListIterator* firstIterator(List* list) {
-	ListIterator* listIterator = (ListIterator*) malloc(sizeof(ListIterator));
+LinkedListIterator* ll_firstIterator(LinkedList* list) {
+	LinkedListIterator* listIterator = (LinkedListIterator*) malloc(sizeof(LinkedListIterator));
 	listIterator->list = list;
-	if (isEmpty(list)) {
+	if(ll_isEmpty(list)) {
 		listIterator->listNode = list->sentinel;
-		//LOG("Iterator requested on an empty list");
-	} else {
+		SLOG_INFO("Iterator requested on an empty list");
+	}
+	else {
 		listIterator->listNode = list->sentinel->next;
 	}
 	return listIterator;
 }
 
 ////////////////////////////////////////////////////////////
-ListIterator* lastIterator(List* list) {
-	ListIterator* listIterator = (ListIterator*) malloc(sizeof(ListIterator));
+LinkedListIterator* ll_lastIterator(LinkedList* list) {
+	LinkedListIterator* listIterator = (LinkedListIterator*) malloc(sizeof(LinkedListIterator));
 	listIterator->list = list;
-	if (isEmpty(list)) {
+	if(ll_isEmpty(list)) {
 		listIterator->listNode = list->sentinel;
-		//LOG("Iterator requested on an empty list");
-	} else {
+		SLOG_INFO("Iterator requested on an empty list");
+	}
+	else {
 		listIterator->listNode = list->sentinel->previous;
 	}
 	return listIterator;
 }
 
 ////////////////////////////////////////////////////////////
-bool hasNext(ListIterator* listIterator) {
+bool ll_hasNext(LinkedListIterator* listIterator) {
 	return (listIterator->listNode != listIterator->list->sentinel);
 }
 
 ////////////////////////////////////////////////////////////
-void* next(ListIterator* listIterator) {
+void* ll_next(LinkedListIterator* listIterator) {
 	void* value = listIterator->listNode->value;
 	listIterator->listNode = listIterator->listNode->next;
 	return value;
 }
 
 ////////////////////////////////////////////////////////////
-bool hasPrev(ListIterator* listIterator) {
+bool ll_hasPrev(LinkedListIterator* listIterator) {
 	return (listIterator->listNode != listIterator->list->sentinel);
 }
 
 ////////////////////////////////////////////////////////////
-void* prev(ListIterator* listIterator) {
+void* ll_prev(LinkedListIterator* listIterator) {
 	void* value = listIterator->listNode->value;
 	listIterator->listNode = listIterator->listNode->previous;
 	return value;
 }
 
 ////////////////////////////////////////////////////////////
-void deleteIterator(ListIterator* listIterator) {
+void ll_deleteIterator(LinkedListIterator* listIterator) {
 	free(listIterator);
 }

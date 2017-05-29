@@ -20,72 +20,72 @@
 
 /**
  * @file LinkedList.h
- * @brief      Implementation of a doubly linked list which use sentinel nodes
+ * @brief      Definition of a doubly linked list and its related functions.
  * @author     Pinard Maxime
  * @author     Cortier Benoît
- * @version    0.1
- * @date       19/05/16
+ * @version    0.2
+ * @date       10/10/16
  */
 
 #ifndef UTBM_LP25_S2016_PROJECT_LINKEDLIST_H
 #define UTBM_LP25_S2016_PROJECT_LINKEDLIST_H
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdlib.h>
-#include <stdio.h>
 #include <stdbool.h>
+#include <log.h>
 
 /*-------------------------------------------------------------------------*//**
- * @struct ListNode
+ * @struct LinkedListNode
  *
- * @brief      Node used in the doubly linked list List
+ * @brief      Node used in the doubly linked list LinkedList
  */
 typedef struct elem {
-	void* value; /**< Pointer on the ListNode value */
-	struct elem* next; /**< Pointer on the next ListNode of the List (or the tail sentinel node) */
-	struct elem* previous; /**< Pointer on the previous ListNode of the List (or the head sentinel node) */
-} ListNode;
+	void* value; /**< Pointer on the LinkedListNode value */
+	struct elem* next; /**< Pointer on the next LinkedListNode of the LinkedList (or the tail sentinel node) */
+	struct elem* previous; /**< Pointer on the previous LinkedListNode of the LinkedList (or the head sentinel node) */
+} LinkedListNode;
 
 /*-------------------------------------------------------------------------*//**
- * @struct List
+ * @struct LinkedList
  *
  * @brief      Doubly linked list which use sentinel nodes and store the list
  */
 typedef struct {
-	ListNode* sentinel; /**< Pointer on sentinel node */
-	size_t size; /**< List size */
-	size_t valueSize; /**< Size of the value parameter of ListNode */
-} List;
+	LinkedListNode* sentinel; /**< Pointer on sentinel node */
+	unsigned int size; /**< LinkedList size */
+} LinkedList;
 
 /*-------------------------------------------------------------------------*//**
- * @struct ListIterator
+ * @struct LinkedListIterator
  *
- * @brief      Iterator used with the doubly linked list List
+ * @brief      Iterator used with the doubly linked list LinkedList
  */
 typedef struct {
-	List* list; /**< Pointer on the list */
-	ListNode* listNode; /**< Pointer on the list node */
-} ListIterator;
+	LinkedList* list; /**< Pointer on the list */
+	LinkedListNode* listNode; /**< Pointer on the list node */
+} LinkedListIterator;
 
 /*-------------------------------------------------------------------------*//**
- * @brief      Create a new List.
+ * @brief      Create a new LinkedList.
  *
- * @param[in]  elementSize  The size of the elements of the list used in dynamic
- *                          allocation (use sizeof(ElementType) to get the size
- *                          of an element of type ElementType).
- *
- * @return     The newly created List.
+ * @return     The newly created LinkedList.
  */
-List* createList(size_t elementSize);
+LinkedList* ll_createList();
 
 /*-------------------------------------------------------------------------*//**
- * @brief      Delete the given list and free the List pointer.
+ * @brief      Delete the given list and free the LinkedList pointer.
  *
  * @param      list  The list
  *
- * @details    After calling this function the List pointer will no longer point
- *             on a List.
+ * @details    After calling this function the LinkedList pointer will no longer point
+ *             on a LinkedList.
  */
-void deleteList(List* list);
+void ll_deleteList(LinkedList* list);
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Determines if the list is empty.
@@ -94,7 +94,7 @@ void deleteList(List* list);
  *
  * @return     True if empty, False otherwise.
  */
-bool isEmpty(List* list);
+bool ll_isEmpty(LinkedList* list);
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Get the list size.
@@ -103,7 +103,7 @@ bool isEmpty(List* list);
  *
  * @return     The size.
  */
-size_t getSize(List* list);
+unsigned int ll_getSize(LinkedList* list);
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Insert the given element at the first position in the list.
@@ -111,7 +111,7 @@ size_t getSize(List* list);
  * @param      list     The list
  * @param      element  The element
  */
-void insertFirst(List* list, void* element);
+void ll_insertFirst(LinkedList* list, void* element);
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Insert the given element at the last position in the list.
@@ -119,7 +119,7 @@ void insertFirst(List* list, void* element);
  * @param      list     The list
  * @param      element  The element
  */
-void insertLast(List* list, void* element);
+void ll_insertLast(LinkedList* list, void* element);
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Insert the given element at the given position in the list.
@@ -131,7 +131,7 @@ void insertLast(List* list, void* element);
  * @details    If the given element position is greater or equals to the list
  *             size, it will be inserted at the last position
  */
-void insertElement(List* list, size_t elementPosition, void* element);
+void ll_insertElement(LinkedList* list, unsigned int elementPosition, void* element);
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Remove the first element of the list.
@@ -141,7 +141,7 @@ void insertElement(List* list, size_t elementPosition, void* element);
  * @return     True if the first element was deleted, False if there is no first
  *             element (the list is empty).
  */
-bool removeFirst(List* list);
+bool ll_removeFirst(LinkedList* list);
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Remove the last element of the list.
@@ -151,7 +151,7 @@ bool removeFirst(List* list);
  * @return     True if the last element was deleted, False if there is no last
  *             element (the list is empty).
  */
-bool removeLast(List* list);
+bool ll_removeLast(LinkedList* list);
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Remove the element at the given position
@@ -163,7 +163,7 @@ bool removeLast(List* list);
  *             out of the list range (or the list is empty) and no element was
  *             deleted.
  */
-bool removeElement(List* list, size_t elementPosition);
+bool ll_removeElement(LinkedList* list, unsigned int elementPosition);
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Get the first element of the list.
@@ -172,7 +172,7 @@ bool removeElement(List* list, size_t elementPosition);
  *
  * @return     The first element of the list.
  */
-void* getFirst(List* list);
+void* ll_getFirst(LinkedList* list);
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Get the last element of the list.
@@ -181,7 +181,7 @@ void* getFirst(List* list);
  *
  * @return     The last element of the list.
  */
-void* getLast(List* list);
+void* ll_getLast(LinkedList* list);
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Get the element at the given position in the list.
@@ -192,7 +192,7 @@ void* getLast(List* list);
  * @return     The element or NULL if the given position is out of the list
  *             range (or the list is empty).
  */
-void* getElement(List* list, size_t elementPosition);
+void* ll_getElement(LinkedList* list, unsigned int elementPosition);
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Check if the list contains the given elements
@@ -206,7 +206,7 @@ void* getElement(List* list, size_t elementPosition);
  * @details    The function compare must return 0 if the 2 elements passed in
  *             parameters are equals.
  */
-bool contains(List* list, void* element, int (* compare)(void*, void*));
+bool ll_contains(LinkedList* list, void* element, int (* compare)(void*, void*));
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Get the given element position.
@@ -221,83 +221,88 @@ bool contains(List* list, void* element, int (* compare)(void*, void*));
  * @details    The function compare must return 0 if the 2 elements passed in
  *             parameters are equals.
  */
-unsigned int getElementPosition(List* list, void* element, int (* compare)(void*, void*));
+unsigned int ll_getElementPosition(LinkedList* list, void* element, int (* compare)(void*, void*));
 
 /*-------------------------------------------------------------------------*//**
- * @brief      Get the ListNode at the given position in the list
+ * @brief      Get the LinkedListNode at the given position in the list
  *
  * @param      list                 The list
- * @param[in]  listElementPosition  The ListNode position
+ * @param[in]  listElementPosition  The LinkedListNode position
  *
- * @return     The ListNode or NULL if the given position is out of the list
+ * @return     The LinkedListNode or NULL if the given position is out of the list
  *             range (or the list is empty).
  */
-ListNode* getListNode(List* list, size_t listElementPosition);
+LinkedListNode* ll_getListNode(LinkedList* list, unsigned int listElementPosition);
 
-/**
- * @brief      Create a ListIterator at the head of the list
+/*-------------------------------------------------------------------------*//**
+ * @brief      Create a LinkedListIterator at the head of the list
  *
  * @param      list  The list
  *
- * @return     The ListIterator if the list isn't empty, NULL otherwise.
+ * @return     The LinkedListIterator if the list isn't empty, NULL otherwise.
  */
-ListIterator* firstIterator(List* list);
+LinkedListIterator* ll_firstIterator(LinkedList* list);
 
-/**
- * @brief      Create a ListIterator at the tail of the list
+/*-------------------------------------------------------------------------*//**
+ * @brief      Create a LinkedListIterator at the tail of the list
  *
  * @param      list  The list
  *
- * @return     The ListIterator if the list isn't empty, NULL otherwise.
+ * @return     The LinkedListIterator if the list isn't empty, NULL otherwise.
  */
-ListIterator* lastIterator(List* list);
+LinkedListIterator* ll_lastIterator(LinkedList* list);
 
-/**
- * @brief      Determines if the ListIterator related ListNode has a next
- *             ListNode.
+/*-------------------------------------------------------------------------*//**
+ * @brief      Determines if the LinkedListIterator related LinkedListNode has a next
+ *             LinkedListNode.
  *
  * @param      listIterator  The list iterator
  *
  * @return     True if has next, False otherwise.
  */
-bool hasNext(ListIterator* listIterator);
+bool ll_hasNext(LinkedListIterator* listIterator);
 
-/**
+/*-------------------------------------------------------------------------*//**
  * @brief      Returns the next value of the iterator.
  *
  * @param      listIterator  The list iterator
  *
  * @return     the next value.
  */
-void* next(ListIterator* listIterator);
+void* ll_next(LinkedListIterator* listIterator);
 
-/**
- * @brief      Determines if the ListIterator related ListNode has a previous
- *             ListNode.
+/*-------------------------------------------------------------------------*//**
+ * @brief      Determines if the LinkedListIterator related LinkedListNode has a previous
+ *             LinkedListNode.
  *
  * @param      listIterator  The list iterator
  *
  * @return     True if has previous, False otherwise.
  */
-bool hasPrev(ListIterator* listIterator);
+bool ll_hasPrev(LinkedListIterator* listIterator);
 
-/**
+/*-------------------------------------------------------------------------*//**
  * @brief      Returns the previous value of the iterator.
  *
  * @param      listIterator  The list iterator
  *
  * @return     the previous value.
  */
-void* prev(ListIterator* listIterator);
+void* ll_prev(LinkedListIterator* listIterator);
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Free the listIterator.
  *
  * @param      listIterator  The list iterator
  *
- * @details    After calling this function the ListIterator pointer will no
- *             longer point on a ListIterator.
+ * @details    After calling this function the LinkedListIterator pointer will no
+ *             longer point on a LinkedListIterator.
  */
-void deleteIterator(ListIterator* listIterator);
+void ll_deleteIterator(LinkedListIterator* listIterator);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif //UTBM_LP25_S2016_PROJECT_LINKEDLIST_H
