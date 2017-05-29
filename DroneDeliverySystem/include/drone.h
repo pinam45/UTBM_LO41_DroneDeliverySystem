@@ -7,9 +7,9 @@
  * @brief Represents a drone
  */
 typedef struct {
-	int maxLoad; //!< max load of the drone.
-	int autonomy; //!< autonomy in minutes.
-	int rechargingTime; //!< recharging time in minutes.
+	unsigned int maxLoad; //!< max load of the drone.
+	unsigned int autonomy; //!< autonomy in minutes.
+	unsigned int rechargingTime; //!< recharging time in minutes.
 } Drone;
 
 /**
@@ -20,6 +20,6 @@ typedef struct {
  *
  * @return the power consumption of the drone
  */
-int computePowerConsumption(Drone drone, Package package, double mothershipToClientDistance);
+unsigned int computePowerConsumption(Drone drone, Package package, double mothershipToClientDistance);
 
 #endif //UTBM_LO41_DRONEDELIVERYSYSTEM_DRONE_H

@@ -6,7 +6,7 @@
  */
 typedef struct {
 	int priority; //!< priority of a package
-	int weight; //!< weight of a package
+	unsigned int weight; //!< weight of a package
 } Package;
 
 #endif //UTBM_LO41_DRONEDELIVERYSYSTEM_PACKAGE_HPP
