@@ -72,6 +72,10 @@ add_executable(
 add_dependencies(UTBM_LO41_DroneDeliverySystem ConsoleControl)
 target_link_libraries(UTBM_LO41_DroneDeliverySystem ConsoleControl)
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(UTBM_LO41_DroneDeliverySystem Threads::Threads)
+
 set_property(TARGET UTBM_LO41_DroneDeliverySystem PROPERTY C_STANDARD 11)
 set_property(TARGET UTBM_LO41_DroneDeliverySystem PROPERTY C_STANDARD_REQUIRED ON)
 message(STATUS "UTBM_LO41_DroneDeliverySystem set standard to use: c11")
