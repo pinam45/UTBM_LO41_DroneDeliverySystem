@@ -5,9 +5,9 @@
 #include "drone.h"
 
 static unsigned int numberOfDrone = 0;
-static struct mq_attr attr = { 0, 100, 1024 /* TODO */, 0};
+static struct mq_attr attr = { 0, 10, 2048, 0};
 
-Drone* drone_constructor(unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, MotherShip* motherShip) {
+Drone* drone_constructor(unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, Mothership* motherShip) {
 	Drone* drone = (Drone*)malloc(sizeof(Drone));
 	drone->id = numberOfDrone++;
 	drone->maxLoad = maxLoad;
@@ -17,7 +17,7 @@ Drone* drone_constructor(unsigned int maxLoad, unsigned int autonomy, unsigned i
 	char buffer[10];
 	sprintf(buffer, "/drone%03d", drone->id);
 
-	if ((drone->msgQueueID = mq_open(buffer, O_WRONLY | O_CREAT, 0660)) == -1) {
+	if ((drone->msgQueueID = mq_open(buffer, O_WRONLY | O_CREAT, 0660, &attr)) == -1) {
 		char errorBuffer[30];
 		sprintf(errorBuffer, "Could not create drone %03d", drone->id);
 		perror(errorBuffer);
@@ -34,6 +34,7 @@ Drone* drone_constructor(unsigned int maxLoad, unsigned int autonomy, unsigned i
 	}
 
 	drone->motherShip = motherShip;
+	drone->client = NULL;
 
 	return drone;
 }

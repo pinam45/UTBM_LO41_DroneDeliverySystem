@@ -15,10 +15,11 @@ struct drone {
 	unsigned int autonomy; //!< autonomy in minutes.
 	unsigned int rechargingTime; //!< recharging time in minutes.
 	mqd_t msgQueueID;
-	MotherShip* motherShip;
+	Mothership* motherShip;
+	Client* client;
 };
 
-Drone* drone_constructor(unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, MotherShip* motherShip);
+Drone* drone_constructor(unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, Mothership* motherShip);
 
 void drone_free(Drone* drone);
 

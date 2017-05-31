@@ -1,15 +1,20 @@
 #ifndef UTBM_LO41_DRONEDELIVERYSYSTEM_MOTHERSHIP_HPP
 #define UTBM_LO41_DRONEDELIVERYSYSTEM_MOTHERSHIP_HPP
 
+#include <mqueue.h>
+
 #include "LinkedList.h"
-#include "drone.h"
 #include "typedefs.h"
 
 struct mothership {
-	LinkedList droneList;
+	LinkedList* droneList;
+	LinkedList* clientList;
+	LinkedList* packageList;
+	mqd_t msgQueueID;
 };
 
-// TODO
-MotherShip* mothership_constructor();
+Mothership* mothership_constructor(LinkedList* droneList, LinkedList* clientList, LinkedList* packageList);
+
+void mothership_free(Mothership* mothership);
 
 #endif //UTBM_LO41_DRONEDELIVERYSYSTEM_MOTHERSHIP_HPP
