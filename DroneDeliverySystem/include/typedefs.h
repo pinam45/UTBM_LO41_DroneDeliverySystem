@@ -1,0 +1,7 @@
+#ifndef UTBM_LO41_DRONEDELIVERYSYSTEM_TYPEDEFS_H
+#define UTBM_LO41_DRONEDELIVERYSYSTEM_TYPEDEFS_H
+
+typedef struct motherShip MotherShip;
+typedef struct drone Drone;
+
+#endif //UTBM_LO41_DRONEDELIVERYSYSTEM_TYPEDEFS_H

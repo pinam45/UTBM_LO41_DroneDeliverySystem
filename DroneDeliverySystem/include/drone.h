@@ -1,16 +1,26 @@
 #ifndef UTBM_LO41_DRONEDELIVERYSYSTEM_DRONE_H
 #define UTBM_LO41_DRONEDELIVERYSYSTEM_DRONE_H
 
-#include <package.h>
+#include <mqueue.h>
+
+#include "package.h"
+#include "typedefs.h"
 
 /**
  * @brief Represents a drone
  */
-typedef struct {
+struct drone {
+	unsigned int id;
 	unsigned int maxLoad; //!< max load of the drone.
 	unsigned int autonomy; //!< autonomy in minutes.
 	unsigned int rechargingTime; //!< recharging time in minutes.
-} Drone;
+	mqd_t msgQueueID;
+	MotherShip* motherShip;
+};
+
+Drone* drone_constructor(unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, MotherShip* motherShip);
+
+void drone_free(Drone* drone);
 
 /**
  * Computes the power consumption of the drone.

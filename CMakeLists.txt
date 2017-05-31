@@ -60,7 +60,7 @@ set(CMAKE_EXE_LINKER_FLAGS " -static")
 # Set sources
 message(STATUS "Sources preparation")
 file(GLOB_RECURSE SOURCE_FILES
-  "${CMAKE_CURRENT_SOURCE_DIR}/DroneDeliverySystem/src/*"
+  "${CMAKE_CURRENT_SOURCE_DIR}/DroneDeliverySystem/src/*.c"
   )
 message(" -> Sources prepared")
 
@@ -75,6 +75,7 @@ target_link_libraries(UTBM_LO41_DroneDeliverySystem ConsoleControl)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(UTBM_LO41_DroneDeliverySystem Threads::Threads)
+target_link_libraries(UTBM_LO41_DroneDeliverySystem rt)
 
 set_property(TARGET UTBM_LO41_DroneDeliverySystem PROPERTY C_STANDARD 11)
 set_property(TARGET UTBM_LO41_DroneDeliverySystem PROPERTY C_STANDARD_REQUIRED ON)
