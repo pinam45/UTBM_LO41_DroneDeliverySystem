@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 //                                                                             //
 //    UTBM_LP25_S2016_Project, school project                                  //
-//    Copyright (C) 2016  Cortier Benoît & Pinard Maxime                       //
+//    Copyright (C) 2016  Cortier Benoît & Pinard Maxime & Boulmier Jérôme     //
 //                                                                             //
 //    This program is free software: you can redistribute it and/or modify     //
 //    it under the terms of the GNU General Public License as published by     //
@@ -23,8 +23,9 @@
  * @brief      Definition of a doubly linked list and its related functions.
  * @author     Pinard Maxime
  * @author     Cortier Benoît
- * @version    0.2
- * @date       10/10/16
+ * @author	   Boulmier Jérôme
+ * @version    0.3
+ * @date       1/06/2017
  */
 
 #ifndef UTBM_LP25_S2016_PROJECT_LINKEDLIST_H
@@ -132,6 +133,15 @@ void ll_insertLast(LinkedList* list, void* element);
  *             size, it will be inserted at the last position
  */
 void ll_insertElement(LinkedList* list, unsigned int elementPosition, void* element);
+
+/**
+ * @brief	   Insert the given element in a sorted linked list
+ * @param 	   list				The list
+ * @param 	   element			The element
+ * @param      comparator		A compator
+ * @since 0.3
+ */
+void ll_insertSorted(LinkedList* list, void* element, int (* comparator)(void*, void*));
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Remove the first element of the list.

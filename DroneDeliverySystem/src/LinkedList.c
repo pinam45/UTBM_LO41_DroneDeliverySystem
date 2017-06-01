@@ -246,3 +246,37 @@ void* ll_prev(LinkedListIterator* listIterator) {
 void ll_deleteIterator(LinkedListIterator* listIterator) {
 	free(listIterator);
 }
+
+void ll_insertSorted(LinkedList* list, void* element, int (* comparator)(void*, void*)) {
+	if (list->size == 0) {
+		LinkedListNode* toInsert = (LinkedListNode*)malloc(sizeof(LinkedListNode));
+		toInsert->value = element;
+		toInsert->previous = list->sentinel;
+		toInsert->next = list->sentinel;
+
+		list->sentinel->next = toInsert;
+		list->sentinel->previous = toInsert;
+
+		++(list->size);
+		return;
+	}
+
+	LinkedListNode* node = list->sentinel->next;
+	while (node != list->sentinel) {
+		if ((*comparator)(element, node->value) < 0) {
+			LinkedListNode* toInsert = (LinkedListNode*)malloc(sizeof(LinkedListNode));
+			toInsert->value = element;
+			toInsert->next = node;
+			toInsert->previous = node->previous;
+
+			node->previous->next = toInsert;
+			node->previous = toInsert;
+
+			++(list->size);
+			return;
+		}
+		node = node->next;
+	}
+
+	ll_insertLast(list, element);
+}
