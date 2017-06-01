@@ -92,6 +92,41 @@ void ll_insertElement(LinkedList* list, unsigned int elementPosition, void* elem
 }
 
 ////////////////////////////////////////////////////////////
+void ll_insertSorted(LinkedList* list, void* element, int (* comparator)(void*, void*)) {
+	if (list->size == 0) {
+		LinkedListNode* toInsert = (LinkedListNode*)malloc(sizeof(LinkedListNode));
+		toInsert->value = element;
+		toInsert->previous = list->sentinel;
+		toInsert->next = list->sentinel;
+
+		list->sentinel->next = toInsert;
+		list->sentinel->previous = toInsert;
+
+		++(list->size);
+		return;
+	}
+
+	LinkedListNode* node = list->sentinel->next;
+	while (node != list->sentinel) {
+		if ((*comparator)(element, node->value) < 0) {
+			LinkedListNode* toInsert = (LinkedListNode*)malloc(sizeof(LinkedListNode));
+			toInsert->value = element;
+			toInsert->next = node;
+			toInsert->previous = node->previous;
+
+			node->previous->next = toInsert;
+			node->previous = toInsert;
+
+			++(list->size);
+			return;
+		}
+		node = node->next;
+	}
+
+	ll_insertLast(list, element);
+}
+
+////////////////////////////////////////////////////////////
 bool ll_removeFirst(LinkedList* list) {
 	if(list->size) {
 		LinkedListNode* listNode = list->sentinel->next;
@@ -164,6 +199,18 @@ bool ll_contains(LinkedList* list, void* element, int (* compare)(void*, void*))
 		tmpNode = tmpNode->next;
 	}
 	return (tmpNode != list->sentinel);
+}
+
+////////////////////////////////////////////////////////////
+void* ll_findElement(LinkedList* list, void* descriptor, int (* check)(void*, void*)) {
+	LinkedListNode* tmpNode = list->sentinel->next;
+	while(tmpNode != list->sentinel){
+		if((*check)(descriptor, tmpNode->value)){
+			return tmpNode->value;
+		}
+		tmpNode = tmpNode->next;
+	}
+	return NULL; // not found
 }
 
 ////////////////////////////////////////////////////////////
@@ -245,38 +292,4 @@ void* ll_prev(LinkedListIterator* listIterator) {
 ////////////////////////////////////////////////////////////
 void ll_deleteIterator(LinkedListIterator* listIterator) {
 	free(listIterator);
-}
-
-void ll_insertSorted(LinkedList* list, void* element, int (* comparator)(void*, void*)) {
-	if (list->size == 0) {
-		LinkedListNode* toInsert = (LinkedListNode*)malloc(sizeof(LinkedListNode));
-		toInsert->value = element;
-		toInsert->previous = list->sentinel;
-		toInsert->next = list->sentinel;
-
-		list->sentinel->next = toInsert;
-		list->sentinel->previous = toInsert;
-
-		++(list->size);
-		return;
-	}
-
-	LinkedListNode* node = list->sentinel->next;
-	while (node != list->sentinel) {
-		if ((*comparator)(element, node->value) < 0) {
-			LinkedListNode* toInsert = (LinkedListNode*)malloc(sizeof(LinkedListNode));
-			toInsert->value = element;
-			toInsert->next = node;
-			toInsert->previous = node->previous;
-
-			node->previous->next = toInsert;
-			node->previous = toInsert;
-
-			++(list->size);
-			return;
-		}
-		node = node->next;
-	}
-
-	ll_insertLast(list, element);
 }

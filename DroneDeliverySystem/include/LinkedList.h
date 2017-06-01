@@ -134,12 +134,14 @@ void ll_insertLast(LinkedList* list, void* element);
  */
 void ll_insertElement(LinkedList* list, unsigned int elementPosition, void* element);
 
-/**
- * @brief	   Insert the given element in a sorted linked list
- * @param 	   list				The list
- * @param 	   element			The element
- * @param      comparator		A compator
- * @since 0.3
+/*-------------------------------------------------------------------------*//**
+ * @brief      Insert the given element in a sorted linked list
+ *
+ * @param      list        The list
+ * @param      element     The element
+ * @param      comparator  The function used to compare the elements
+ *
+ * @since      0.3
  */
 void ll_insertSorted(LinkedList* list, void* element, int (* comparator)(void*, void*));
 
@@ -205,7 +207,7 @@ void* ll_getLast(LinkedList* list);
 void* ll_getElement(LinkedList* list, unsigned int elementPosition);
 
 /*-------------------------------------------------------------------------*//**
- * @brief      Check if the list contains the given elements
+ * @brief      Check if the list contains the given element.
  *
  * @param      list     The list
  * @param      element  The element
@@ -217,6 +219,21 @@ void* ll_getElement(LinkedList* list, unsigned int elementPosition);
  *             parameters are equals.
  */
 bool ll_contains(LinkedList* list, void* element, int (* compare)(void*, void*));
+
+/*-------------------------------------------------------------------------*//**
+ * @brief      Find an element in a list.
+ *
+ * @param      list        The list
+ * @param      descriptor  Descriptor, passed as first argument of the
+ *                         comparison function
+ * @param[in]  check       The function used to check the elements with the
+ *                         descriptor (descriptor as first argument, element as
+ *                         second), must return true for a wanted, false
+ *                         otherwise
+ *
+ * @return     The wanted element if found, NULL otherwise
+ */
+void* ll_findElement(LinkedList* list, void* descriptor, int (* check)(void*, void*));
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Get the given element position.
