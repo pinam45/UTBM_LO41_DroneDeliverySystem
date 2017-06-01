@@ -3,6 +3,7 @@
 #include <fcntl.h>
 
 #include "drone.h"
+#include "drone_message.hpp"
 
 static unsigned int numberOfDrone = 0;
 static struct mq_attr attr = { 0, 10, 2048, 0};
@@ -47,4 +48,8 @@ void drone_free(Drone* drone) {
 	}
 
 	free(drone);
+}
+
+void drone_sendMessage(Drone* drone, DroneMessage* message) {
+	check(mq_send(drone->msgQueueID, (const char*) message, sizeof(DroneMessage), 0), "mq_send failed");
 }

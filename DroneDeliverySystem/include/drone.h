@@ -23,6 +23,8 @@ Drone* drone_constructor(unsigned int maxLoad, unsigned int autonomy, unsigned i
 
 void drone_free(Drone* drone);
 
+void drone_sendMessage(Drone* drone, DroneMessage* message);
+
 /**
  * Computes the power consumption of the drone.
  * @param[in] drone a drone
