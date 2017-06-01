@@ -17,4 +17,6 @@ Mothership* mothership_constructor(LinkedList* droneList, LinkedList* clientList
 
 void mothership_free(Mothership* mothership);
 
+void mothership_sendMessage(Mothership* mothership, MothershipMessage* message);
+
 #endif //UTBM_LO41_DRONEDELIVERYSYSTEM_MOTHERSHIP_HPP

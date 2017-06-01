@@ -1,6 +1,7 @@
 #include "mothership.h"
 
 static struct mq_attr attr = { 0, 20, 2048, 0};
+#include "mothership_message.h"
 
 Mothership* mothership_constructor(LinkedList* droneList, LinkedList* clientList, LinkedList* packageList) {
 	Mothership* mothership = (Mothership*)malloc(sizeof(Mothership));
@@ -36,4 +37,9 @@ void mothership_free(Mothership* mothership) {
 	}
 
 	free(mothership);
+}
+
+
+void mothership_sendMessage(Mothership* mothership, MothershipMessage* message) {
+	check(mq_send(mothership->msgQueueID, (const char*) message, sizeof(MothershipMessage), 0), "mq_send failed");
 }
