@@ -1,15 +1,19 @@
+#include "drone.h"
+
 #include <stdlib.h>
 #include <stdio.h>
-#include <fcntl.h>
+#include <util.h>
+#include <unistd.h> //FIXME: sleep for test
 
-#include "drone.h"
 #include "drone_message.hpp"
+#include "mothership.h"
+#include "mothership_message.h"
 
 static unsigned int numberOfDrone = 0;
-static struct mq_attr attr = { 0, 10, 2048, 0};
+static struct mq_attr attr;
 
 Drone* drone_constructor(unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, Mothership* motherShip) {
-	Drone* drone = (Drone*)malloc(sizeof(Drone));
+	Drone* drone = (Drone*) malloc(sizeof(Drone));
 	drone->id = numberOfDrone++;
 	drone->maxLoad = maxLoad;
 	drone->autonomy = autonomy;
@@ -18,7 +22,11 @@ Drone* drone_constructor(unsigned int maxLoad, unsigned int autonomy, unsigned i
 	char buffer[10];
 	sprintf(buffer, "/drone%03d", drone->id);
 
-	if ((drone->msgQueueID = mq_open(buffer, O_WRONLY | O_CREAT, 0660, &attr)) == -1) {
+	attr.mq_curmsgs = 0;
+	attr.mq_maxmsg = 10;
+	attr.mq_flags = 0;
+	attr.mq_msgsize = sizeof(DroneMessage);
+	if((drone->msgQueueID = mq_open(buffer, O_RDWR | O_CREAT, 0660, &attr)) == -1) {
 		char errorBuffer[30];
 		sprintf(errorBuffer, "Could not create drone %03d", drone->id);
 		perror(errorBuffer);
@@ -27,7 +35,7 @@ Drone* drone_constructor(unsigned int maxLoad, unsigned int autonomy, unsigned i
 		return NULL;
 	}
 
-	if (mq_unlink(buffer) == -1) {
+	if(mq_unlink(buffer) == -1) {
 		mq_close(drone->msgQueueID);
 		free(drone);
 
@@ -41,13 +49,34 @@ Drone* drone_constructor(unsigned int maxLoad, unsigned int autonomy, unsigned i
 }
 
 void drone_free(Drone* drone) {
-	if (mq_close(drone->msgQueueID) == -1) {
+	if(mq_close(drone->msgQueueID) == -1) {
 		char errorBuffer[30];
 		sprintf(errorBuffer, "Could not destroy drone %03d", drone->id);
 		perror(errorBuffer);
 	}
 
 	free(drone);
+}
+
+void* drone_launch(/* Drone* */ void* drone) {
+	//FIXME: test start
+	Drone* drone1 = (Drone*) drone;
+	sleep(drone1->id);
+	while(true) {
+		MothershipMessage mothershipMessage;
+		mothershipMessage.sender_id = drone1->id;
+		mothershipMessage.type = DRONE_PACKAGE_DELIVERED_SUCCESS;
+		mothership_sendMessage(drone1->motherShip, &mothershipMessage);
+		printf("[Drone %d] Sent message to mothership\n", drone1->id);
+
+		DroneMessage droneMessage;
+		check((int) mq_receive(drone1->msgQueueID, (char*) &droneMessage, sizeof(DroneMessage), 0),
+		      "mq_receive failed");
+		printf("[Drone %d] received message from mothership\n", drone1->id);
+		sleep(4);
+	}
+	//FIXME: test end
+	return NULL; // TODO: pthread_exit
 }
 
 void drone_sendMessage(Drone* drone, DroneMessage* message) {

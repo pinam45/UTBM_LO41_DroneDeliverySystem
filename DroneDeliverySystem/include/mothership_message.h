@@ -3,7 +3,7 @@
 
 #include "typedefs.h"
 
-enum mothership_message_type{
+enum mothership_message_type {
 	DRONE_BACK_TO_MOTHERSHIP,
 	DRONE_DONE_CHARGING,
 	DRONE_PACKAGE_DELIVERED_SUCCESS,
@@ -11,7 +11,7 @@ enum mothership_message_type{
 	//TODO
 };
 
-struct mothership_message{
+struct mothership_message {
 	MothershipMessageType type;
 	unsigned int sender_id;
 };

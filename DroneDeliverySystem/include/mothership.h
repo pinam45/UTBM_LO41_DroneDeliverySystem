@@ -2,6 +2,7 @@
 #define UTBM_LO41_DRONEDELIVERYSYSTEM_MOTHERSHIP_HPP
 
 #include <mqueue.h>
+#include <pthread.h>
 
 #include "LinkedList.h"
 #include "typedefs.h"
@@ -16,6 +17,8 @@ struct mothership {
 Mothership* mothership_constructor(LinkedList* droneList, LinkedList* clientList, LinkedList* packageList);
 
 void mothership_free(Mothership* mothership);
+
+void mothership_launch(Mothership* mothership);
 
 void mothership_sendMessage(Mothership* mothership, MothershipMessage* message);
 

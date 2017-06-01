@@ -3,14 +3,14 @@
 
 #include "typedefs.h"
 
-enum drone_message_type{
+enum drone_message_type {
 	MOTHERSHIP_GO_DELIVER_PACKAGE,
 	MOTHERSHIP_GO_RECHARGE,
 	MOTHERSHIP_END_OF_DELIVERY
 	//TODO
 };
 
-struct drone_message{
+struct drone_message {
 	DroneMessageType type;
 };
 
