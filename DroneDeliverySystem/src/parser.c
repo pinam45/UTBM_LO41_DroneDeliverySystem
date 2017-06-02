@@ -3,9 +3,6 @@
 #include "package.h"
 #include "drone.h"
 
-// private API
-
-int package_comparator(Package* lhs, Package* rhs);
 
 LinkedList* loadDronesFromFile(FILE* file, Mothership* ship) {
 	LinkedList* list = ll_createList();
@@ -36,12 +33,4 @@ LinkedList* loadPackageFromFile(FILE* file) {
 	}
 
 	return list;
-}
-
-int package_comparator(Package* lhs, Package* rhs) {
-  if (lhs->priority == rhs->priority) {
-    return (int)lhs->weight - (int)rhs->weight;
-  }
-
-  return (int)lhs->priority - (int)rhs->priority;
 }
