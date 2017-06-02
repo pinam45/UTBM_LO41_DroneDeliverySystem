@@ -1,15 +1,13 @@
 #ifndef UTBM_LO41_DRONEDELIVERYSYSTEM_MOTHERSHIP_MESSAGE_H
 #define UTBM_LO41_DRONEDELIVERYSYSTEM_MOTHERSHIP_MESSAGE_H
 
-#include "typedefs.h"
-
-enum mothership_message_type {
+typedef enum mothership_message_type {
 	DRONE_BACK_TO_MOTHERSHIP,
 	DRONE_DONE_CHARGING,
 	DRONE_PACKAGE_DELIVERED_SUCCESS,
 	DRONE_PACKAGE_DELIVERED_FAIL
 	//TODO
-};
+} MothershipMessageType;
 
 struct mothership_message {
 	MothershipMessageType type;

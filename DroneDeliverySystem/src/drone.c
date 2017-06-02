@@ -5,7 +5,7 @@
 #include <util.h>
 #include <unistd.h> //FIXME: sleep for test
 
-#include "drone_message.hpp"
+#include "drone_message.h"
 #include "mothership.h"
 #include "mothership_message.h"
 

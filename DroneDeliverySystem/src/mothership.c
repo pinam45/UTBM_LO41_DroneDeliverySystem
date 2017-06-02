@@ -4,7 +4,7 @@
 #include <unistd.h>  //FIXME: sleep for test
 
 #include "drone.h"
-#include "drone_message.hpp"
+#include "drone_message.h"
 #include "mothership_message.h"
 
 static struct mq_attr attr;
