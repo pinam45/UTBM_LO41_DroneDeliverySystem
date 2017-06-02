@@ -1,5 +1,5 @@
-#ifndef UTBM_LO41_DRONEDELIVERYSYSTEM_MOTHERSHIP_HPP
-#define UTBM_LO41_DRONEDELIVERYSYSTEM_MOTHERSHIP_HPP
+#ifndef UTBM_LO41_DRONEDELIVERYSYSTEM_MOTHERSHIP_H
+#define UTBM_LO41_DRONEDELIVERYSYSTEM_MOTHERSHIP_H
 
 #include <mqueue.h>
 #include <pthread.h>
@@ -22,4 +22,4 @@ void mothership_launch(Mothership* mothership);
 
 void mothership_sendMessage(Mothership* mothership, MothershipMessage* message);
 
-#endif //UTBM_LO41_DRONEDELIVERYSYSTEM_MOTHERSHIP_HPP
+#endif //UTBM_LO41_DRONEDELIVERYSYSTEM_MOTHERSHIP_H

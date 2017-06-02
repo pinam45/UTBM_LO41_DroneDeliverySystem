@@ -1,5 +1,5 @@
-#ifndef UTBM_LO41_DRONEDELIVERYSYSTEM_UTIL_H_H
-#define UTBM_LO41_DRONEDELIVERYSYSTEM_UTIL_H_H
+#ifndef UTBM_LO41_DRONEDELIVERYSYSTEM_UTIL_H
+#define UTBM_LO41_DRONEDELIVERYSYSTEM_UTIL_H
 
 
 /*-------------------------------------------------------------------------*//**
@@ -16,4 +16,4 @@
 void check(int result, const char* format, ...);
 
 
-#endif //UTBM_LO41_DRONEDELIVERYSYSTEM_UTIL_H_H
+#endif //UTBM_LO41_DRONEDELIVERYSYSTEM_UTIL_H
