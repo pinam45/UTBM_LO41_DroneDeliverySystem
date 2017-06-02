@@ -2,6 +2,7 @@
 
 #include <util.h>
 #include <unistd.h>  //FIXME: sleep for test
+#include <LinkedList.h>
 
 #include "drone.h"
 #include "drone_message.h"
@@ -10,6 +11,9 @@
 static struct mq_attr attr;
 
 static int check_drone(void* droneId, void* drone);
+static void process_message(Mothership* mothership, MothershipMessage* message);
+static void find_package(Mothership* mothership, Drone* drone);
+static void poweroff_drone(Drone* drone);
 
 int check_drone(void* droneId, void* drone) {
 	return *((unsigned int*) droneId) == ((Drone*) drone)->id;
@@ -78,7 +82,7 @@ void mothership_launch(Mothership* mothership) {
 		Drone* drone = ll_findElement(mothership->droneList, (void*) &mothershipMessage.sender_id, &check_drone);
 		if(drone != NULL) {
 			DroneMessage droneMessage;
-			droneMessage.type = MOTHERSHIP_GO_DELIVER_PACKAGE;
+			droneMessage.type = MOTHERSHIP_END_OF_DELIVERY;
 			drone_sendMessage(drone, &droneMessage);
 			printf("[Mothership] Sent message to drone %d\n", drone->id);
 		} else {
@@ -94,4 +98,57 @@ void mothership_launch(Mothership* mothership) {
 
 void mothership_sendMessage(Mothership* mothership, MothershipMessage* message) {
 	check(mq_send(mothership->msgQueueID, (const char*) message, sizeof(MothershipMessage), 0), "mq_send failed");
+}
+
+void process_message(Mothership* mothership, MothershipMessage* message) {
+	Drone* drone = ll_findElement(mothership->droneList, (void*) &message->sender_id, &check_drone);
+
+	switch (message->type) {
+		case DRONE_PACKAGE_DELIVERED_SUCCESS: // useless ?
+		case DRONE_BACK_TO_MOTHERSHIP:
+			if (ll_isEmpty(mothership->packageList)) {
+				poweroff_drone(drone);
+			} else {
+				find_package(mothership, drone);
+			}
+			break;
+		case DRONE_DONE_CHARGING:
+			if (ll_isEmpty(mothership->packageList)) {
+				poweroff_drone(drone);
+			} else {
+				find_package(mothership, drone);
+			}
+			break;
+		case DRONE_PACKAGE_DELIVERED_FAIL:
+			//ll_insertSorted(mothership->packageList, pkg, (int(*)(void*, void*))&package_comparator);
+			break;
+	}
+}
+
+void poweroff_drone(Drone* drone) {
+	DroneMessage answer;
+	answer.type = MOTHERSHIP_END_OF_DELIVERY;
+
+	drone_sendMessage(drone, &answer);
+}
+
+void find_package(Mothership* mothership, Drone* drone) {
+
+	LinkedListIterator* begin = ll_firstIterator(mothership->packageList);
+	Package* pkg = NULL;
+	while (ll_hasNext(begin) && pkg == NULL) {
+		Package* value = (Package*) ll_next(begin);
+		if (value->weight <= drone->maxLoad) {
+			pkg = value;
+		}
+	}
+
+	if (pkg == NULL) {
+		poweroff_drone(drone);
+	} else {
+		DroneMessage answer;
+		answer.type = MOTHERSHIP_GO_DELIVER_PACKAGE;
+		// FIXME: Set drone package.
+		drone_sendMessage(drone, &answer);
+	}
 }
