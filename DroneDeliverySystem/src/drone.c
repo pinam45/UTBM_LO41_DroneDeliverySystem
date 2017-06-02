@@ -12,6 +12,8 @@
 static unsigned int numberOfDrone = 0;
 static struct mq_attr attr;
 
+static void process_message(Drone* drone, DroneMessage* message);
+
 Drone* drone_constructor(unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, Mothership* motherShip) {
 	Drone* drone = (Drone*) malloc(sizeof(Drone));
 	drone->id = numberOfDrone++;
@@ -81,4 +83,27 @@ void* drone_launch(/* Drone* */ void* drone) {
 
 void drone_sendMessage(Drone* drone, DroneMessage* message) {
 	check(mq_send(drone->msgQueueID, (const char*) message, sizeof(DroneMessage), 0), "mq_send failed");
+}
+
+void process_message(Drone* drone, DroneMessage* message) {
+	switch (message->type) {
+		case MOTHERSHIP_END_OF_DELIVERY:
+			LOG_INFO("Drone %03d poweroff", drone->id);
+			pthread_exit(0);
+			break;
+		case MOTHERSHIP_GO_RECHARGE:
+			{
+				sleep(drone->rechargingTime); // TODO: Maybe the drone should waits messages.
+				MothershipMessage mothershipMessage;
+				mothershipMessage.sender_id = drone->id;
+				mothershipMessage.type = DRONE_DONE_CHARGING;
+			}
+			break;
+		case MOTHERSHIP_GO_DELIVER_PACKAGE:
+			// TODO
+			break;
+		default:
+			// TODO
+			break;
+	}
 }
