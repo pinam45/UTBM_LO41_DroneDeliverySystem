@@ -33,6 +33,8 @@ endif()
 # Disable compiler specific extensions
 set(CMAKE_C_EXTENSIONS OFF)
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_POSIX_C_SOURCE=200112L")
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DLOGGER_ENABLED")
 	message(STATUS "Debug mode: Logger enabled (LOGGER_ENABLED macro defined)")
