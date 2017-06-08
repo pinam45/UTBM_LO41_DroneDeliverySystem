@@ -7,15 +7,16 @@
 #include <log.h>
 #include <pthread.h>
 
-static unsigned int numberOfClient = 0;
 static struct mq_attr attr;
 
 static bool process_message(Client* client, ClientMessage* message);
 
-Client* client_constructor(unsigned int distance) {
+Client* client_constructor(unsigned int id, unsigned int distance, unsigned int packagesToReceive, unsigned int targetInstalledTime) {
 	Client* client = (Client*) malloc(sizeof(Client));
-	client->id = numberOfClient++;
+	client->id = id;
 	client->distance = distance;
+	client->packagesToReceive = packagesToReceive;
+	client->targetInstalledTime = targetInstalledTime;
 	client->targetInstalled = false;
 
 	char buffer[11];
