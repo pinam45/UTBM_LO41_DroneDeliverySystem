@@ -17,6 +17,6 @@ Package* package_constructor(int priority, unsigned int weight, unsigned int cli
 
 int package_comparator(Package* lhs, Package* rhs);
 
-void package_destructor(Package* pkg);
+void package_free(Package* pkg);
 
 #endif //UTBM_LO41_DRONEDELIVERYSYSTEM_PACKAGE_H

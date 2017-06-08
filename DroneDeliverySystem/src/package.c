@@ -22,6 +22,6 @@ int package_comparator(Package* lhs, Package* rhs) {
 	return lhs->priority - rhs->priority;
 }
 
-void package_destructor(Package* package) {
+void package_free(Package* package) {
 	free(package);
 }
