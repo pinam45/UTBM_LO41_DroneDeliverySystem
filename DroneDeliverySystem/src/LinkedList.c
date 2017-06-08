@@ -202,12 +202,17 @@ bool ll_contains(LinkedList* list, void* element, int (* compare)(void*, void*))
 }
 
 ////////////////////////////////////////////////////////////
-void* ll_findElement(LinkedList* list, void* descriptor, int (* check)(void*, void*)) {
+LinkedListIterator* ll_findElement(LinkedList* list, void* descriptor, int (* check)(void*, void*)) {
 	LinkedListNode* tmpNode = list->sentinel->next;
 	while(tmpNode != list->sentinel){
 		if((*check)(descriptor, tmpNode->value)){
-			return tmpNode->value;
+			LinkedListIterator* listIterator = (LinkedListIterator*) malloc(sizeof(LinkedListIterator));
+			listIterator->list = list;
+			listIterator->listNode = tmpNode;
+
+			return listIterator;
 		}
+
 		tmpNode = tmpNode->next;
 	}
 	return NULL; // not found
@@ -296,11 +301,16 @@ void ll_removeIt(LinkedListIterator* listIterator) {
 
 	listIterator->listNode = listIterator->listNode->next;
 
-	free(node->value);
+	--(listIterator->list->size);
+
 	free(node);
 }
 
 ////////////////////////////////////////////////////////////
 void ll_deleteIterator(LinkedListIterator* listIterator) {
 	free(listIterator);
+}
+
+void* ll_getValue(LinkedListIterator* it) {
+	return it->listNode->value;
 }

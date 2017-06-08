@@ -104,7 +104,8 @@ void mothership_sendMessage(Mothership* mothership, MothershipMessage* message) 
 }
 
 void process_message(Mothership* mothership, MothershipMessage* message) {
-	Drone* drone = ll_findElement(mothership->droneList, (void*) &message->sender_id, &check_drone);
+	LinkedListIterator* droneIt = ll_findElement(mothership->droneList, (void*) &message->sender_id, &check_drone);
+	Drone* drone = (Drone*)ll_getValue(droneIt);
 
 	switch (message->type) {
 		case DRONE_PACKAGE_DELIVERED_SUCCESS:

@@ -231,9 +231,9 @@ bool ll_contains(LinkedList* list, void* element, int (* compare)(void*, void*))
  *                         second), must return true for a wanted, false
  *                         otherwise
  *
- * @return     The wanted element if found, NULL otherwise
+ * @return     An iterator pointing to the wanted element if found, NULL otherwise
  */
-void* ll_findElement(LinkedList* list, void* descriptor, int (* check)(void*, void*));
+LinkedListIterator* ll_findElement(LinkedList* list, void* descriptor, int (* check)(void*, void*));
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Get the given element position.
@@ -278,6 +278,15 @@ LinkedListIterator* ll_firstIterator(LinkedList* list);
  * @return     The LinkedListIterator if the list isn't empty, NULL otherwise.
  */
 LinkedListIterator* ll_lastIterator(LinkedList* list);
+
+/*-------------------------------------------------------------------------*//**
+ * @brief      Returns the underlying element.
+ *
+ * @param      it   An iterator
+ *
+ * @return     the underlying element.
+ */
+void* ll_getValue(LinkedListIterator* it);
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Determines if the LinkedListIterator related LinkedListNode has a next
