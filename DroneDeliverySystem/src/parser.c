@@ -7,12 +7,13 @@
 LinkedList* loadDronesFromFile(FILE* file, Mothership* ship) {
 	LinkedList* list = ll_createList();
 
+	unsigned int id;
 	unsigned int maxLoad;
 	unsigned int autonomy;
 	unsigned int rechargingTime;
 
-	while (fscanf(file, "%u,%u,%u\n", &maxLoad, &autonomy, &rechargingTime) != EOF) {
-		ll_insertLast(list, drone_constructor(maxLoad, autonomy, rechargingTime, ship));
+	while (fscanf(file, "%u,%u,%u,%u\n", &id, &maxLoad, &autonomy, &rechargingTime) != EOF) {
+		ll_insertLast(list, drone_constructor(id, maxLoad, autonomy, rechargingTime, ship));
 	}
 
 	return list;

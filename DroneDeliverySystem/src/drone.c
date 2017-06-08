@@ -8,15 +8,13 @@
 #include "drone_message.h"
 #include "mothership.h"
 #include "mothership_message.h"
-
-static unsigned int numberOfDrone = 0;
 static struct mq_attr attr;
 
 static void process_message(Drone* drone, DroneMessage* message);
 
-Drone* drone_constructor(unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, Mothership* motherShip) {
+Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, Mothership* motherShip) {
 	Drone* drone = (Drone*) malloc(sizeof(Drone));
-	drone->id = numberOfDrone++;
+	drone->id = id;
 	drone->maxLoad = maxLoad;
 	drone->autonomy = autonomy;
 	drone->rechargingTime = rechargingTime;

@@ -19,7 +19,7 @@ struct drone {
 	Client* client;
 };
 
-Drone* drone_constructor(unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, Mothership* motherShip);
+Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, Mothership* motherShip);
 
 void drone_free(Drone* drone);
 
