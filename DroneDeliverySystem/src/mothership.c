@@ -72,8 +72,11 @@ void mothership_launch(Mothership* mothership) {
 		check(pthread_create(&threads[i], &attrs[i], &drone_launch, (void*) drone), "pthread_create failed");
 	}
 
+	ll_deleteIterator(listIterator);
+
 	//FIXME: test start
-	while(true) {
+	int count = 0;
+	while(count < 2) {
 		MothershipMessage mothershipMessage;
 		check((int) mq_receive(mothership->msgQueueID, (char*) &mothershipMessage, sizeof(MothershipMessage), 0),
 		      "mq_receive failed");
@@ -104,8 +107,15 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 	Drone* drone = ll_findElement(mothership->droneList, (void*) &message->sender_id, &check_drone);
 
 	switch (message->type) {
-		case DRONE_PACKAGE_DELIVERED_SUCCESS: // useless ?
+		case DRONE_PACKAGE_DELIVERED_SUCCESS:
+			drone->deliverySucess = true;
+			break;
 		case DRONE_BACK_TO_MOTHERSHIP:
+			if (!drone->deliverySucess) {
+				--(drone->package->numberOfTryRemaining);
+				ll_insertSorted(mothership->packageList, drone->package, (int(*)(void*, void*))&package_comparator);
+			}
+
 			if (ll_isEmpty(mothership->packageList)) {
 				poweroff_drone(drone);
 			} else {
@@ -120,7 +130,9 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 			}
 			break;
 		case DRONE_PACKAGE_DELIVERED_FAIL:
-			//ll_insertSorted(mothership->packageList, pkg, (int(*)(void*, void*))&package_comparator);
+			// TODO: Log
+			break;
+		default:
 			break;
 	}
 }
@@ -134,11 +146,11 @@ void poweroff_drone(Drone* drone) {
 
 void find_package(Mothership* mothership, Drone* drone) {
 
-	LinkedListIterator* begin = ll_firstIterator(mothership->packageList);
+	LinkedListIterator* it = ll_firstIterator(mothership->packageList);
 	Package* pkg = NULL;
-	while (ll_hasNext(begin) && pkg == NULL) {
-		Package* value = (Package*) ll_next(begin);
-		if (value->weight <= drone->maxLoad) {
+	while (ll_hasNext(it) && pkg == NULL) {
+		Package* value = (Package*) ll_next(it);
+		if (value->weight <= drone->maxLoad && value->numberOfTryRemaining > 0) {
 			pkg = value;
 		}
 	}
@@ -148,7 +160,11 @@ void find_package(Mothership* mothership, Drone* drone) {
 	} else {
 		DroneMessage answer;
 		answer.type = MOTHERSHIP_GO_DELIVER_PACKAGE;
-		// FIXME: Set drone package.
+
+		ll_removeIt(it);
+		ll_deleteIterator(it);
+
+		drone->package = pkg;
 		drone_sendMessage(drone, &answer);
 	}
 }

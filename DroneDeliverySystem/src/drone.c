@@ -44,6 +44,8 @@ Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int aut
 
 	drone->motherShip = motherShip;
 	drone->client = NULL;
+	drone->package = NULL;
+	drone->deliverySucess = false;
 
 	return drone;
 }

@@ -2,6 +2,7 @@
 #define UTBM_LO41_DRONEDELIVERYSYSTEM_DRONE_H
 
 #include <mqueue.h>
+#include <stdbool.h>
 
 #include "package.h"
 #include "typedefs.h"
@@ -17,6 +18,8 @@ struct drone {
 	mqd_t msgQueueID;
 	Mothership* motherShip;
 	Client* client;
+	Package* package;
+	bool deliverySucess;
 };
 
 Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, Mothership* motherShip);
