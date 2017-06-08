@@ -68,7 +68,7 @@ void* client_launch(void* client) {
 	ssize_t result;
 
 	while(client1->packagesToReceive > 0){
-		result = mq_timedreceive(client1->msgQueueID, (char*) &clientMessage, sizeof(ClientMessage), 0, time);
+		result = mq_timedreceive(client1->msgQueueID, (char*) &clientMessage, sizeof(ClientMessage), 0, &time);
 		if(result < 0){
 			if(errno != ETIMEDOUT){
 				check(result, "mq_receive failed\n");
