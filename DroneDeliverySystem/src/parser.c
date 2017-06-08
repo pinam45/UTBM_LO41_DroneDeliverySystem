@@ -2,7 +2,7 @@
 
 #include "package.h"
 #include "drone.h"
-
+#include "client.h"
 
 LinkedList* loadDronesFromFile(FILE* file, Mothership* ship) {
 	LinkedList* list = ll_createList();
@@ -32,7 +32,22 @@ LinkedList* loadPackagesFromFile(FILE* file) {
 		package->weight = weight;
 		package->clientID = clientID;
 
-		ll_insertSorted(list, package,  (int(*)(void*, void*))&package_comparator);
+		ll_insertSorted(list, package, (int(*)(void*, void*))&package_comparator);
+	}
+
+	return list;
+}
+
+LinkedList* loadClientsFromFile(FILE* file) {
+	LinkedList* list = ll_createList();
+
+	unsigned int id;
+	unsigned int distance;
+	unsigned int packagesToReceive;
+	unsigned int targetInstalledTime;
+
+	while (fscanf(file, "%u,%u,%u,%u", &id, &distance, &packagesToReceive, &targetInstalledTime) != EOF) {
+		ll_insertLast(list, client_constructor(id, distance, packagesToReceive, targetInstalledTime));
 	}
 
 	return list;
