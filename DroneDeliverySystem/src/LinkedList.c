@@ -289,6 +289,17 @@ void* ll_prev(LinkedListIterator* listIterator) {
 	return value;
 }
 
+void ll_removeIt(LinkedListIterator* listIterator) {
+	LinkedListNode* node = listIterator->listNode;
+	node->previous->next = node->next;
+	node->next->previous = node->previous;
+
+	listIterator->listNode = listIterator->listNode->next;
+
+	free(node->value);
+	free(node);
+}
+
 ////////////////////////////////////////////////////////////
 void ll_deleteIterator(LinkedListIterator* listIterator) {
 	free(listIterator);

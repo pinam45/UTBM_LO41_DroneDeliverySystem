@@ -317,6 +317,14 @@ bool ll_hasPrev(LinkedListIterator* listIterator);
  */
 void* ll_prev(LinkedListIterator* listIterator);
 
+
+/*-------------------------------------------------------------------------*//**
+ * @brief      Removes the underlying node from the list.
+ *
+ * @param      listIterator  The list iterator
+ *
+ */
+void ll_removeIt(LinkedListIterator* listIterator);
 /*-------------------------------------------------------------------------*//**
  * @brief      Free the listIterator.
  *
