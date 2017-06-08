@@ -9,6 +9,7 @@
 struct package {
 	int priority; //!< priority of a package
 	unsigned int weight; //!< weight of a package
+	unsigned int clientID; //!< id of the client.
 };
 
 int package_comparator(Package* lhs, Package* rhs);

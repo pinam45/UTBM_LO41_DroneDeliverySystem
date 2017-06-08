@@ -18,16 +18,18 @@ LinkedList* loadDronesFromFile(FILE* file, Mothership* ship) {
 	return list;
 }
 
-LinkedList* loadPackageFromFile(FILE* file) {
+LinkedList* loadPackagesFromFile(FILE* file) {
 	LinkedList* list = ll_createList();
 
 	int priority;
 	unsigned int weight;
+	unsigned int clientID;
 
-	while (fscanf(file, "%d,%u\n", &priority, &weight) != EOF) {
+	while (fscanf(file, "%d,%u,%u\n", &priority, &weight, &clientID) != EOF) {
 		Package* package = (Package*)malloc(sizeof(Package));
 		package->priority = priority;
 		package->weight = weight;
+		package->clientID = clientID;
 
 		ll_insertSorted(list, package,  (int(*)(void*, void*))&package_comparator);
 	}

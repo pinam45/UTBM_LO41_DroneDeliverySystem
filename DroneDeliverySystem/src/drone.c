@@ -97,6 +97,8 @@ void process_message(Drone* drone, DroneMessage* message) {
 				MothershipMessage mothershipMessage;
 				mothershipMessage.sender_id = drone->id;
 				mothershipMessage.type = DRONE_DONE_CHARGING;
+
+				mothership_sendMessage(drone->motherShip, &mothershipMessage);
 			}
 			break;
 		case MOTHERSHIP_GO_DELIVER_PACKAGE:
