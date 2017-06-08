@@ -60,25 +60,15 @@ void drone_free(Drone* drone) {
 	free(drone);
 }
 
-void* drone_launch(/* Drone* */ void* drone) {
-	//FIXME: test start
-	Drone* drone1 = (Drone*) drone;
-	sleep(drone1->id);
-	while(true) {
-		MothershipMessage mothershipMessage;
-		mothershipMessage.sender_id = drone1->id;
-		mothershipMessage.type = DRONE_PACKAGE_DELIVERED_SUCCESS;
-		mothership_sendMessage(drone1->motherShip, &mothershipMessage);
-		printf("[Drone %d] Sent message to mothership\n", drone1->id);
-
+void* drone_launch(Drone* drone) {
+	while (true) {
 		DroneMessage droneMessage;
-		check((int) mq_receive(drone1->msgQueueID, (char*) &droneMessage, sizeof(DroneMessage), 0),
-		      "mq_receive failed");
-		printf("[Drone %d] received message from mothership\n", drone1->id);
-		sleep(4);
+		check((int) mq_receive(drone->msgQueueID, (char*) &droneMessage, sizeof(DroneMessage), 0), "mq_receive failed");
+
+		process_message(drone, &droneMessage);
 	}
-	//FIXME: test end
-	return NULL; // TODO: pthread_exit
+
+	pthread_exit(0);
 }
 
 void drone_sendMessage(Drone* drone, DroneMessage* message) {
@@ -88,11 +78,12 @@ void drone_sendMessage(Drone* drone, DroneMessage* message) {
 void process_message(Drone* drone, DroneMessage* message) {
 	switch (message->type) {
 		case MOTHERSHIP_END_OF_DELIVERY:
-			LOG_INFO("Drone %03d poweroff", drone->id);
+			LOG_INFO("[Drone %03d] poweroff", drone->id);
 			pthread_exit(0);
 			break;
 		case MOTHERSHIP_GO_RECHARGE:
 			{
+				printf("[Drone %03d] DODO", drone->id);
 				sleep(drone->rechargingTime); // TODO: Maybe the drone should waits messages.
 				MothershipMessage mothershipMessage;
 				mothershipMessage.sender_id = drone->id;
@@ -102,10 +93,26 @@ void process_message(Drone* drone, DroneMessage* message) {
 			}
 			break;
 		case MOTHERSHIP_GO_DELIVER_PACKAGE:
-			// TODO
+			LOG_INFO("[Drone %03d] Package", drone->id);
+			//pthread_exit(NULL);
+			MothershipMessage msg;
+			msg.sender_id = drone->id;
+			if (drone->id != 2) {
+				msg.type = DRONE_PACKAGE_DELIVERED_SUCCESS;
+				// TODO: The client should do this
+				package_free(drone->package);
+			} else {
+				msg.type = DRONE_PACKAGE_DELIVERED_FAIL;
+			}
+
+			check(mq_send(drone->motherShip->msgQueueID, (char*)&msg, sizeof(MothershipMessage), 0), "failed to send a message to the mothership");
+
+			msg.type= DRONE_BACK_TO_MOTHERSHIP;
+			check(mq_send(drone->motherShip->msgQueueID, (char*)&msg, sizeof(MothershipMessage), 0), "failed to send a message to the mothership");
 			break;
 		default:
-			// TODO
+			LOG_INFO("[Drone %03d] TODO", drone->id);
+			//pthread_exit(NULL);
 			break;
 	}
 }

@@ -26,7 +26,7 @@ Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int aut
 
 void drone_free(Drone* drone);
 
-void* drone_launch(/* Drone* */ void* drone);
+void* drone_launch(Drone* drone);
 
 void drone_sendMessage(Drone* drone, DroneMessage* message);
 

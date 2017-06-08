@@ -15,6 +15,8 @@ static void process_message(Mothership* mothership, MothershipMessage* message);
 static void find_package(Mothership* mothership, Drone* drone);
 static void poweroff_drone(Drone* drone);
 
+bool has_at_least_one_package_valid(Mothership* pMothership);
+
 int check_drone(void* droneId, void* drone) {
 	return *((unsigned int*) droneId) == ((Drone*) drone)->id;
 }
@@ -25,6 +27,7 @@ Mothership* mothership_constructor(LinkedList* droneList, LinkedList* clientList
 	mothership->droneList = droneList;
 	mothership->clientList = clientList;
 	mothership->packageList = packageList;
+	mothership->numberOfPackages = ll_getSize(packageList);
 
 	const char* buffer = "/mothership";
 
@@ -56,47 +59,69 @@ void mothership_free(Mothership* mothership) {
 		perror(errorBuffer);
 	}
 
+	ll_deleteList(mothership->droneList);
+	ll_deleteList(mothership->packageList);
+	ll_deleteList(mothership->clientList);
+
 	free(mothership);
 }
 
 void mothership_launch(Mothership* mothership) {
 	unsigned int dronesNumbers = ll_getSize(mothership->droneList);
 
-	pthread_attr_t attrs[dronesNumbers];
 	pthread_t threads[dronesNumbers];
 	LinkedListIterator* listIterator = ll_firstIterator(mothership->droneList);
 	for(unsigned int i = 0; i < dronesNumbers; ++i) {
 		Drone* drone = ll_next(listIterator);
-		check(pthread_attr_init(&attrs[i]), "pthread_attr_init failed");
-		check(pthread_attr_setdetachstate(&attrs[i], PTHREAD_CREATE_DETACHED), "pthread_attr_setdetachstate failed");
-		check(pthread_create(&threads[i], &attrs[i], &drone_launch, (void*) drone), "pthread_create failed");
+		check(pthread_create(&threads[i], NULL, (void*(*)(void*))&drone_launch, (void*) drone), "pthread_create failed");
+	}
+
+	ll_deleteIterator(listIterator);
+	listIterator = ll_firstIterator(mothership->droneList);
+
+	while (ll_hasNext(listIterator)) {
+		find_package(mothership, (Drone*)ll_next(listIterator));
 	}
 
 	ll_deleteIterator(listIterator);
 
-	//FIXME: test start
-	int count = 0;
-	while(count < 2) {
-		MothershipMessage mothershipMessage;
-		check((int) mq_receive(mothership->msgQueueID, (char*) &mothershipMessage, sizeof(MothershipMessage), 0),
-		      "mq_receive failed");
-		printf("[Mothership] Received message from drone %d\n", mothershipMessage.sender_id);
-
-		Drone* drone = ll_findElement(mothership->droneList, (void*) &mothershipMessage.sender_id, &check_drone);
-		if(drone != NULL) {
-			DroneMessage droneMessage;
-			droneMessage.type = MOTHERSHIP_END_OF_DELIVERY;
-			drone_sendMessage(drone, &droneMessage);
-			printf("[Mothership] Sent message to drone %d\n", drone->id);
-		} else {
-			printf("[Mothership] Drone %d not found", mothershipMessage.sender_id);
-		}
+	while (mothership->numberOfPackages != 0 && has_at_least_one_package_valid(mothership)) {
+		MothershipMessage msg;
+		mq_receive(mothership->msgQueueID, (char*)&msg, sizeof(MothershipMessage), 0);
+		process_message(mothership, &msg);
 	}
-	//FIXME: test end
+
+	listIterator = ll_firstIterator(mothership->droneList);
+	for(unsigned int i = 0; i < dronesNumbers; ++i) {
+		Drone* drone = ll_next(listIterator);
+		poweroff_drone(drone);
+	}
+
+	ll_deleteIterator(listIterator);
 
 	for(unsigned int i = 0; i < dronesNumbers; ++i) {
-		check(pthread_attr_destroy(&attrs[i]), "pthread_attr_destroy failed");
+		check(pthread_join(threads[i], NULL), "pthread_join failed");
+		LOG_INFO("Thread %d stopped", i);
 	}
+}
+
+bool has_at_least_one_package_valid(Mothership* mothership) {
+	if (ll_isEmpty(mothership->packageList)) {
+		return true;
+	}
+
+	LinkedListIterator* it = ll_firstIterator(mothership->packageList);
+
+	while (ll_hasNext(it)) {
+		Package* package = (Package*)ll_next(it);
+		if (package->numberOfTryRemaining > 0) {
+			ll_deleteIterator(it);
+			return true;
+		}
+	}
+
+	ll_deleteIterator(it);
+	return false;
 }
 
 void mothership_sendMessage(Mothership* mothership, MothershipMessage* message) {
@@ -109,19 +134,23 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 
 	switch (message->type) {
 		case DRONE_PACKAGE_DELIVERED_SUCCESS:
+			LOG_INFO("[Mothership] Drone %03d succeed", drone->id);
 			drone->deliverySucess = true;
+			--(mothership->numberOfPackages);
 			break;
 		case DRONE_BACK_TO_MOTHERSHIP:
+			LOG_INFO("[Mothership] Drone %03d back", drone->id);
 			if (!drone->deliverySucess) {
 				--(drone->package->numberOfTryRemaining);
 				ll_insertSorted(mothership->packageList, drone->package, (int(*)(void*, void*))&package_comparator);
 			}
 
-			if (ll_isEmpty(mothership->packageList)) {
-				poweroff_drone(drone);
-			} else {
+			if (!ll_isEmpty(mothership->packageList)) {
 				find_package(mothership, drone);
+			} else if (mothership->numberOfPackages == 0) {
+				poweroff_drone(drone);
 			}
+
 			break;
 		case DRONE_DONE_CHARGING:
 			if (ll_isEmpty(mothership->packageList)) {
@@ -131,11 +160,13 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 			}
 			break;
 		case DRONE_PACKAGE_DELIVERED_FAIL:
-			// TODO: Log
+			LOG_INFO("[Mothership] Drone %03d failed", drone->id);
 			break;
 		default:
 			break;
 	}
+
+	ll_deleteIterator(droneIt);
 }
 
 void poweroff_drone(Drone* drone) {
@@ -146,26 +177,33 @@ void poweroff_drone(Drone* drone) {
 }
 
 void find_package(Mothership* mothership, Drone* drone) {
-
-	LinkedListIterator* it = ll_firstIterator(mothership->packageList);
 	Package* pkg = NULL;
-	while (ll_hasNext(it) && pkg == NULL) {
-		Package* value = (Package*) ll_next(it);
-		if (value->weight <= drone->maxLoad && value->numberOfTryRemaining > 0) {
-			pkg = value;
+
+	if (!ll_isEmpty(mothership->packageList)) {
+		LinkedListIterator* it = ll_firstIterator(mothership->packageList);
+
+		while (ll_hasNext(it) && pkg == NULL) {
+			Package* value = (Package*) ll_next(it);
+			if (value->weight <= drone->maxLoad && value->numberOfTryRemaining > 0) {
+				pkg = value;
+			}
 		}
-	}
 
-	if (pkg == NULL) {
-		poweroff_drone(drone);
-	} else {
-		DroneMessage answer;
-		answer.type = MOTHERSHIP_GO_DELIVER_PACKAGE;
+		if (pkg != NULL) {
+			DroneMessage answer;
+			answer.type = MOTHERSHIP_GO_DELIVER_PACKAGE;
 
-		ll_removeIt(it);
+			(void)ll_prev(it);
+			ll_removeIt(it);
+
+			drone->package = pkg;
+			drone_sendMessage(drone, &answer);
+		} else if (mothership->numberOfPackages == 0 || !has_at_least_one_package_valid(mothership)) {
+			poweroff_drone(drone);
+		}
+
 		ll_deleteIterator(it);
-
-		drone->package = pkg;
-		drone_sendMessage(drone, &answer);
+	} else if (mothership->numberOfPackages == 0 || !has_at_least_one_package_valid(mothership)) {
+		poweroff_drone(drone);
 	}
 }

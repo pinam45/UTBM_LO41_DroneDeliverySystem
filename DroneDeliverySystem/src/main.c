@@ -1,15 +1,17 @@
 #include <stdio.h>
-#include <typedefs.h>
+
+#include "typedefs.h"
 #include "drone.h"
 #include "mothership.h"
+#include "parser.h"
 
 int main() {
-	printf("Hello, World!");
-
 	//FIXME: test start
 	LinkedList* droneList = ll_createList();
 	LinkedList* clientList = ll_createList();
-	LinkedList* packageList = ll_createList();
+	FILE* packageFile = fopen("Packages.txt", "r");
+	LinkedList* packageList = loadPackagesFromFile(packageFile);
+	fclose(packageFile);
 	Mothership* mothership = mothership_constructor(droneList, clientList, packageList);
 	if(mothership == NULL) {
 		printf("aaaa");
@@ -27,7 +29,10 @@ int main() {
 	ll_insertLast(droneList, drone5);
 
 	mothership_launch(mothership);
+
 	//FIXME: test end
 
-	return 0;
+	mothership_free(mothership);
+
+	pthread_exit(0);
 }
