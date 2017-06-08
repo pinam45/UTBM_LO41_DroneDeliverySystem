@@ -71,7 +71,7 @@ void* client_launch(void* client) {
 		result = mq_timedreceive(client1->msgQueueID, (char*) &clientMessage, sizeof(ClientMessage), 0, &time);
 		if(result < 0){
 			if(errno != ETIMEDOUT){
-				check(result, "mq_receive failed\n");
+				check((int)result, "mq_receive failed\n");
 			}
 			else{
 				if(client1->targetInstalled){
