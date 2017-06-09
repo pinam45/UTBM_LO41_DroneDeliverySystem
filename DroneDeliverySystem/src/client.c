@@ -50,12 +50,12 @@ Client* client_constructor(unsigned int id, unsigned int distance, unsigned int 
 }
 
 void client_free(Client* client) {
-	if(mq_close(client->msgQueueID) == -1) {
+	int result = mq_close(client->msgQueueID);
+	if(result < 0) {
 		char errorBuffer[30];
-		sprintf(errorBuffer, "Could not destroy client %03d\n", client->id);
-		perror(errorBuffer);
+		sprintf(errorBuffer, "client %03d: mq_close failed\n", client->id);
+		check(result, errorBuffer);
 	}
-
 	free(client);
 }
 
@@ -71,7 +71,9 @@ void* client_launch(void* client) {
 		result = mq_timedreceive(client1->msgQueueID, (char*) &clientMessage, sizeof(ClientMessage), 0, &time);
 		if(result < 0){
 			if(errno != ETIMEDOUT){
-				check((int)result, "mq_receive failed\n");
+				char errorBuffer[35];
+				sprintf(errorBuffer, "client %03d: mq_receive failed\n", client1->id);
+				check((int)result, errorBuffer);
 			}
 			else{
 				if(client1->targetInstalled){
