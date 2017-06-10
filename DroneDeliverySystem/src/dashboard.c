@@ -321,8 +321,12 @@ void* dashboard_launch(void* dashboard) {
 	cc_Vector2 pos = {0, cc_getHeight() - 2};
 	cc_setCursorPosition(pos);
 	cc_setColors(BLACK, WHITE);
-	cc_displayInputs(true);
 	cc_setCursorVisibility(true);
+	printf("Please press any key to exit...");
+	fflush(stdout);
+	cc_getInput();
+	putchar('\n');
+	cc_displayInputs(true);
 	pthread_exit(0);
 }
 
