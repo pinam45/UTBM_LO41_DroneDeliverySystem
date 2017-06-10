@@ -1,11 +1,12 @@
+#include <unistd.h>
+
 #include "mothership.h"
 
-#include <util.h>
-#include <unistd.h>
-#include <LinkedList.h>
-
+#include "util.h"
 #include "client.h"
 #include "drone.h"
+#include "LinkedList.h"
+#include "client_message.h"
 #include "drone_message.h"
 #include "mothership_message.h"
 #include "dashboard.h"
@@ -149,6 +150,27 @@ void mothership_launch(Mothership* mothership) {
 	}
 	ll_deleteIterator(listIterator);
 
+	// Send failure to clients (if relevant)
+	if (!ll_isEmpty(mothership->packageList)) {
+		LinkedListIterator* it = ll_firstIterator(mothership->packageList);
+
+		while (ll_hasNext(it)) {
+			Package* pkg = ll_next(it);
+			if (pkg->numberOfTryRemaining > 0) {
+				ClientMessage msg;
+				msg.type = MOTHERSHIP_UNABLE_TO_SEND_PACKAGE;
+				DashboardMessage d_msg;
+				d_msg.type = D_PACKAGE;
+				d_msg.state = D_PACKAGE_FAIL;
+				d_msg.number = pkg->id;
+
+				client_sendMessage(ll_getElement(mothership->clientList, pkg->clientID), &msg);
+				dashboard_sendMessage(global_dashboard, &d_msg);
+			}
+		}
+
+		ll_deleteIterator(it);
+	}
 	// Join clients threads
 	for(unsigned int i = 0; i < clientsNumbers; ++i) {
 		check(pthread_join(clientsThreads[i], NULL), "pthread_join failed");
@@ -227,7 +249,7 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 				insertAvailable(mothership, drone);
 			}
 
-			if(!drone->deliverySucess && ll_getSize(mothership->availableDrones) > 1) {
+			if(!drone->deliverySucess && ll_getSize(mothership->availableDrones) > 0) {
 				Drone* first_drone_available = (Drone*) ll_getFirst(mothership->availableDrones);
 				removeAvailable(mothership, first_drone_available);
 				find_package(mothership, first_drone_available);

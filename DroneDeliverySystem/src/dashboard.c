@@ -262,6 +262,14 @@ Dashboard* dashboard_constructor(unsigned int packagesNumber, unsigned int drone
 		return NULL;
 	}
 
+	if(mq_unlink("/dashboard") == -1) {
+		perror("Could not create dashboard");
+		mq_close(dashboard->msgQueueID);
+		free(dashboard);
+
+		return NULL;
+	}
+
 	dashboard->packagesNumber = packagesNumber;
 	dashboard->dronesNumber = dronesNumber;
 	dashboard->clientsNumber = clientsNumber;

@@ -121,6 +121,13 @@ void process_message(Client* client, ClientMessage* message) {
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 			LOG_INFO("Client %03d package not received for the last time\n", client->id);
 			break;
+		case MOTHERSHIP_UNABLE_TO_SEND_PACKAGE:
+			client->targetInstalled = false;
+			--(client->packagesToReceive);
+
+			dashboardMessage.state = D_CLIENT_WAITING;
+			dashboard_sendMessage(global_dashboard, &dashboardMessage);
+			LOG_INFO("Client %03d can't be delivered.\n", client->id);
 		default:
 			break;
 	}
