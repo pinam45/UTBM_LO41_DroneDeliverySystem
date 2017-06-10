@@ -10,12 +10,14 @@
 #include "util.h"
 #include "client_message.h"
 #include "log.h"
+#include "dashboard.h"
 
 static struct mq_attr attr;
 
 static void process_message(Client* client, ClientMessage* message);
 
-Client* client_constructor(unsigned int id, unsigned int distance, unsigned int packagesToReceive, unsigned int targetInstalledTime) {
+Client* client_constructor(unsigned int id, unsigned int distance, unsigned int packagesToReceive,
+                           unsigned int targetInstalledTime) {
 	Client* client = (Client*) malloc(sizeof(Client));
 	client->id = id;
 	client->distance = distance;
@@ -59,34 +61,23 @@ void client_free(Client* client) {
 	free(client);
 }
 
-void* client_launch(void* client) {
-	Client* client1 = (Client*) client;
-	ClientMessage clientMessage;
-	struct timespec time;
-	time.tv_sec = client1->targetInstalledTime;
-	time.tv_nsec = 0;
-	ssize_t result;
+void* client_launch(Client* client) {
+	DashboardMessage dashboardMessage;
+	dashboardMessage.type = D_CLIENT;
+	dashboardMessage.number = client->id;
+	dashboardMessage.state = D_CLIENT_WAITING;
+	dashboard_sendMessage(global_dashboard, &dashboardMessage);
 
-	while(client1->packagesToReceive > 0){
-		result = mq_timedreceive(client1->msgQueueID, (char*) &clientMessage, sizeof(ClientMessage), 0, &time);
-		if(result < 0){
-			if(errno != ETIMEDOUT){
-				char errorBuffer[35];
-				sprintf(errorBuffer, "client %03d: mq_receive failed\n", client1->id);
-				check((int)result, errorBuffer);
-			}
-			else{
-				if(client1->targetInstalled){
-					client1->targetInstalled = false;
-					LOG_INFO("Client %03d target removed\n", client1->id);
-				}
-			}
-		}
-		else{
-			process_message(client1, &clientMessage);
-		}
+	ClientMessage clientMessage;
+	while(client->packagesToReceive > 0) {
+		check((int) mq_receive(client->msgQueueID, (char*) &clientMessage, sizeof(ClientMessage), 0),
+		      "Client: mq_receive failed");
+		process_message(client, &clientMessage);
 	}
-	LOG_INFO("Client %03d end of delivery\n", client1->id);
+
+	dashboardMessage.state = D_CLIENT_FINISHED;
+	dashboard_sendMessage(global_dashboard, &dashboardMessage);
+	LOG_INFO("Client %03d end of delivery\n", client->id);
 	pthread_exit(0);
 }
 
@@ -95,20 +86,39 @@ void client_sendMessage(Client* client, ClientMessage* message) {
 }
 
 void process_message(Client* client, ClientMessage* message) {
-	switch(message->type){
+	DashboardMessage dashboardMessage;
+	dashboardMessage.type = D_CLIENT;
+	dashboardMessage.number = client->id;
+
+	switch(message->type) {
 		case DRONE_PUT_TARGET:
 			client->targetInstalled = true;
+
+			dashboardMessage.state = D_CLIENT_TARGET_OUT;
+			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 			LOG_INFO("Client %03d target installed\n", client->id);
 			break;
 		case DRONE_DELIVERY_SUCCESS:
+			client->targetInstalled = false;
 			--(client->packagesToReceive);
+
+			dashboardMessage.state = D_CLIENT_WAITING;
+			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 			LOG_INFO("Client %03d package received\n", client->id);
 			break;
 		case DRONE_DELIVERY_FAILURE:
+			client->targetInstalled = false;
+
+			dashboardMessage.state = D_CLIENT_WAITING;
+			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 			LOG_INFO("Client %03d package not received\n", client->id);
 			break;
 		case DRONE_DELIVERY_FINAL_FAILURE:
+			client->targetInstalled = false;
 			--(client->packagesToReceive);
+
+			dashboardMessage.state = D_CLIENT_WAITING;
+			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 			LOG_INFO("Client %03d package not received for the last time\n", client->id);
 			break;
 		default:

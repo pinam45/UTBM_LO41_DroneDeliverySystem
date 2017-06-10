@@ -10,28 +10,32 @@
 int main() {
 	//FIXME: test start
 	LinkedList* droneList = ll_createList();
-	LinkedList* clientList = ll_createList();
+
+	FILE* clientsFile = fopen("Clients.txt", "r");
+	if(clientsFile == NULL) {
+		SLOG_ERR("Unable to find Clients.txt");
+	}
+	LinkedList* clientList = loadClientsFromFile(clientsFile);
+	fclose(clientsFile);
+
 	FILE* packageFile = fopen("Packages.txt", "r");
 	if(packageFile == NULL) {
 		SLOG_ERR("Unable to find Packages.txt");
 	}
-
 	LinkedList* packageList = loadPackagesFromFile(packageFile);
 	fclose(packageFile);
-	Mothership* mothership = mothership_constructor(droneList, clientList, packageList);
-	if(mothership == NULL) {
-		printf("aaaa");
-	}
 
-	Drone* drone1 = drone_constructor(0, 10, 9, 1, mothership);
+	Mothership* mothership = mothership_constructor(droneList, clientList, packageList);
+
+	Drone* drone1 = drone_constructor(0, 15, 19, 1, mothership);
 	ll_insertLast(droneList, drone1);
-	Drone* drone2 = drone_constructor(1, 10, 7, 4, mothership);
+	Drone* drone2 = drone_constructor(1, 16, 17, 4, mothership);
 	ll_insertLast(droneList, drone2);
-	Drone* drone3 = drone_constructor(2, 10, 10, 1, mothership);
+	Drone* drone3 = drone_constructor(2, 12, 20, 1, mothership);
 	ll_insertLast(droneList, drone3);
-	Drone* drone4 = drone_constructor(3, 10, 10, 3, mothership);
+	Drone* drone4 = drone_constructor(3, 20, 20, 3, mothership);
 	ll_insertLast(droneList, drone4);
-	Drone* drone5 = drone_constructor(4, 10, 8, 2, mothership);
+	Drone* drone5 = drone_constructor(4, 17, 18, 2, mothership);
 	ll_insertLast(droneList, drone5);
 
 	global_dashboard = dashboard_constructor(

@@ -2,11 +2,12 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <util.h>
 #include <unistd.h>
-#include <client.h>
-#include <dashboard.h>
 
+#include "util.h"
+#include "client.h"
+#include "dashboard.h"
+#include "client_message.h"
 #include "drone_message.h"
 #include "mothership.h"
 #include "mothership_message.h"
@@ -130,21 +131,32 @@ bool process_message(Drone* drone, DroneMessage* message) {
 			unsigned int consumption = computePowerConsumption(drone, drone->package, 5);
 
 			sleep(compute_sleep_time(drone));
+			ClientMessage clientMessage;
+			clientMessage.type = DRONE_PUT_TARGET;
+			client_sendMessage(drone->client, &clientMessage);
+			sleep(1);
 
 			MothershipMessage mothershipMessage;
 			mothershipMessage.sender_id = drone->id;
-			if(drone->id != 2) {
+			if(drone->client->targetInstalled) { //TODO: mutex on client
 				dashboardMessage.state = D_DRONE_FLYING_CTM_DELIVERY_SUCCESS;
 				mothershipMessage.type = DRONE_PACKAGE_DELIVERED_SUCCESS;
-				// TODO: The client should do this
-				//package_free(drone->package);
+				clientMessage.type = DRONE_DELIVERY_SUCCESS;
 			} else {
 				dashboardMessage.state = D_DRONE_FLYING_CTM_DELIVERY_FAIL;
 				mothershipMessage.type = DRONE_PACKAGE_DELIVERED_FAIL;
+				if(drone->package->numberOfTryRemaining > 1){
+					--drone->package->numberOfTryRemaining;
+					clientMessage.type = DRONE_DELIVERY_FAILURE;
+				}
+				else{
+					clientMessage.type = DRONE_DELIVERY_FINAL_FAILURE;
+				}
 			}
 
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 			mothership_sendMessage(drone->motherShip, &mothershipMessage);
+			client_sendMessage(drone->client, &clientMessage);
 
 			sleep(compute_sleep_time(drone));
 			drone->autonomy -= consumption;
@@ -163,9 +175,8 @@ bool process_message(Drone* drone, DroneMessage* message) {
 }
 
 unsigned int compute_sleep_time(Drone* drone) {
-	// FIXME: The client isn't set.
-	//unsigned int distance = drone->client->distance / 4;
-	unsigned int distance = 4;
+	int distance = drone->client->distance - 1;
+	// minus 1 to send the target message 1s before arriving
 
-	return distance > 0 ? 1 : distance;
+	return (unsigned int)(distance > 0 ? distance : 1);
 }
