@@ -10,6 +10,10 @@ int main() {
 	LinkedList* droneList = ll_createList();
 	LinkedList* clientList = ll_createList();
 	FILE* packageFile = fopen("Packages.txt", "r");
+	if (packageFile == NULL) {
+		SLOG_ERR("Unable to find Packages.txt");
+	}
+
 	LinkedList* packageList = loadPackagesFromFile(packageFile);
 	fclose(packageFile);
 	Mothership* mothership = mothership_constructor(droneList, clientList, packageList);
