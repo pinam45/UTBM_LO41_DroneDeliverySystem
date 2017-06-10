@@ -46,6 +46,7 @@ int main() {
 	DashboardMessage dashboardMessage;
 	dashboardMessage.type = D_EXIT;
 	dashboard_sendMessage(global_dashboard, &dashboardMessage);
+	check(pthread_join(dashboardThread, NULL), "pthread_join failed");
 
 	//FIXME: test end
 
