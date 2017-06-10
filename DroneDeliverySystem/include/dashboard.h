@@ -1,12 +1,12 @@
 #ifndef UTBM_LO41_DRONEDELIVERYSYSTEM_DASHBOARD_H
 #define UTBM_LO41_DRONEDELIVERYSYSTEM_DASHBOARD_H
 
-#include <ConsoleControl.h>
 #include <mqueue.h>
+#include <ConsoleControl.h>
 
 #include "typedefs.h"
 
-typedef enum{
+typedef enum {
 	D_DRONE_WAITING = 0,
 	D_DRONE_CHARGING,
 	D_DRONE_FLYING_MTC,
@@ -21,22 +21,22 @@ typedef enum{
 	D_PACKAGE_SUCCESS,
 	D_PACKAGE_FAIL,
 	D_UNKNOWN,
-}DashboardElementState;
+} DashboardElementState;
 
-typedef enum{
+typedef enum {
 	D_PACKAGE,
 	D_DRONE,
 	D_CLIENT,
 	D_EXIT
-}DashboardElementType;
+} DashboardElementType;
 
-struct dashboard_message{
+struct dashboard_message {
 	DashboardElementState state;
 	DashboardElementType type;
 	unsigned int number;
 };
 
-struct dashboard{
+struct dashboard {
 	mqd_t msgQueueID;
 	unsigned int packagesNumber;
 	unsigned int dronesNumber;

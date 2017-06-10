@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <dashboard.h>
+#include <util.h>
 
 #include "typedefs.h"
 #include "drone.h"
@@ -10,7 +12,7 @@ int main() {
 	LinkedList* droneList = ll_createList();
 	LinkedList* clientList = ll_createList();
 	FILE* packageFile = fopen("Packages.txt", "r");
-	if (packageFile == NULL) {
+	if(packageFile == NULL) {
 		SLOG_ERR("Unable to find Packages.txt");
 	}
 
@@ -32,11 +34,23 @@ int main() {
 	Drone* drone5 = drone_constructor(4, 10, 6, 2, mothership);
 	ll_insertLast(droneList, drone5);
 
+	global_dashboard = dashboard_constructor(
+		ll_getSize(packageList),
+		ll_getSize(droneList),
+		ll_getSize(clientList)
+	);
+	pthread_t dashboardThread;
+	check(pthread_create(&dashboardThread, NULL, &dashboard_launch, (void*) global_dashboard), "pthread_create failed");
+
 	mothership_launch(mothership);
+	DashboardMessage dashboardMessage;
+	dashboardMessage.type = D_EXIT;
+	dashboard_sendMessage(global_dashboard, &dashboardMessage);
 
 	//FIXME: test end
 
 	mothership_free(mothership);
+	dashboard_free(global_dashboard);
 
 	pthread_exit(0);
 }

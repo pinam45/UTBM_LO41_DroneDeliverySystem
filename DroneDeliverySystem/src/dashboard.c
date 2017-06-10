@@ -1,7 +1,7 @@
-#include <ConsoleControl.h>
+#include "dashboard.h"
+
 #include <util.h>
 #include <pthread.h>
-#include "dashboard.h"
 
 static cc_Color main_bg_color = BLACK;
 static cc_Color main_fg_color = WHITE;
