@@ -42,6 +42,16 @@ void ll_deleteList(LinkedList* list) {
 	free(list);
 }
 
+void ll_deleteListNoClean(LinkedList* list) {
+	LinkedListNode* tmpNode = list->sentinel->next;
+	while(tmpNode != list->sentinel) {
+		tmpNode = tmpNode->next;
+		free(tmpNode->previous);
+	}
+	free(list->sentinel);
+	free(list);
+}
+
 ////////////////////////////////////////////////////////////
 bool ll_isEmpty(LinkedList* list) {
 	return !(list->size);

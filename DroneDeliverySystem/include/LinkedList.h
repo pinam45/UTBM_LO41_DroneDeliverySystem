@@ -89,6 +89,15 @@ LinkedList* ll_createList();
 void ll_deleteList(LinkedList* list);
 
 /*-------------------------------------------------------------------------*//**
+ * @brief      Delete the given list.
+ *
+ * @param      list  The list
+ *
+ * @details    After calling this function the LinkedList pointer will no longer point
+ *             on a LinkedList.
+ */
+void ll_deleteListNoClean(LinkedList* list);
+/*-------------------------------------------------------------------------*//**
  * @brief      Determines if the list is empty.
  *
  * @param      list  The list
