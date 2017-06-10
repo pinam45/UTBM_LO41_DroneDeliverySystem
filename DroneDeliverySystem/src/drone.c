@@ -3,18 +3,22 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <util.h>
-#include <unistd.h> //FIXME: sleep for test
+#include <unistd.h>
 #include <client.h>
+#include <dashboard.h>
 
 #include "drone_message.h"
 #include "mothership.h"
 #include "mothership_message.h"
+
 static struct mq_attr attr;
 
-static void process_message(Drone* drone, DroneMessage* message);
+static bool process_message(Drone* drone, DroneMessage* message);
+
 static unsigned int compute_sleep_time(Drone* drone);
 
-Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, Mothership* motherShip) {
+Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int autonomy,
+                         unsigned int rechargingTime, Mothership* motherShip) {
 	Drone* drone = (Drone*) malloc(sizeof(Drone));
 	drone->id = id;
 	drone->maxLoad = maxLoad;
@@ -64,13 +68,11 @@ void drone_free(Drone* drone) {
 }
 
 void* drone_launch(Drone* drone) {
-	while (true) {
-		DroneMessage droneMessage;
+	DroneMessage droneMessage;
+	check((int) mq_receive(drone->msgQueueID, (char*) &droneMessage, sizeof(DroneMessage), 0), "mq_receive failed");
+	while(process_message(drone, &droneMessage)) {
 		check((int) mq_receive(drone->msgQueueID, (char*) &droneMessage, sizeof(DroneMessage), 0), "mq_receive failed");
-
-		process_message(drone, &droneMessage);
 	}
-
 	pthread_exit(0);
 }
 
@@ -82,55 +84,76 @@ unsigned int computePowerConsumption(Drone* drone, Package* package, double moth
 	return package->weight + (unsigned int) mothershipToClientDistance;
 }
 
-void process_message(Drone* drone, DroneMessage* message) {
-	switch (message->type) {
-		case MOTHERSHIP_END_OF_DELIVERY:
+bool process_message(Drone* drone, DroneMessage* message) {
+	DashboardMessage dashboardMessage;
+	dashboardMessage.type = D_DRONE;
+	dashboardMessage.number = drone->id;
+
+	switch(message->type) {
+		case MOTHERSHIP_END_OF_DELIVERY: {
+			dashboardMessage.state = D_DRONE_FINISHED;
+			dashboard_sendMessage(global_dashboard, &dashboardMessage);
+
 			LOG_INFO("[Drone %03d] poweroff", drone->id);
-			pthread_exit(0);
-			break;
-		case MOTHERSHIP_GO_RECHARGE:
-			{
-				LOG_INFO("[Drone %03d] Recharging battery", drone->id);
-				sleep(drone->rechargingTime);
-				drone->autonomy = drone->maxAutonomy;
-				MothershipMessage mothershipMessage;
-				mothershipMessage.sender_id = drone->id;
-				mothershipMessage.type = DRONE_DONE_CHARGING;
+			return false;
+		}
+		case MOTHERSHIP_GO_RECHARGE: {
+			dashboardMessage.state = D_DRONE_CHARGING;
+			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 
-				LOG_INFO("[Drone %03d] Battery charged", drone->id);
+			LOG_INFO("[Drone %03d] Recharging battery", drone->id);
+			sleep(drone->rechargingTime);
+			drone->autonomy = drone->maxAutonomy;
 
-				mothership_sendMessage(drone->motherShip, &mothershipMessage);
-			}
+			LOG_INFO("[Drone %03d] Battery charged", drone->id);
+
+			dashboardMessage.state = D_DRONE_WAITING;
+			dashboard_sendMessage(global_dashboard, &dashboardMessage);
+
+			MothershipMessage mothershipMessage;
+			mothershipMessage.sender_id = drone->id;
+			mothershipMessage.type = DRONE_DONE_CHARGING;
+			mothership_sendMessage(drone->motherShip, &mothershipMessage);
 			break;
-		case MOTHERSHIP_GO_DELIVER_PACKAGE:
+		}
+		case MOTHERSHIP_GO_DELIVER_PACKAGE: {
+			dashboardMessage.state = D_DRONE_FLYING_MTC;
+			dashboard_sendMessage(global_dashboard, &dashboardMessage);
+
 			LOG_INFO("[Drone %03d] Package", drone->id);
 			unsigned int consumption = computePowerConsumption(drone, drone->package, 5);
 
 			sleep(compute_sleep_time(drone));
 
-			MothershipMessage msg;
-			msg.sender_id = drone->id;
-			if (drone->id != 2) {
-				msg.type = DRONE_PACKAGE_DELIVERED_SUCCESS;
+			MothershipMessage mothershipMessage;
+			mothershipMessage.sender_id = drone->id;
+			if(drone->id != 2) {
+				dashboardMessage.state = D_DRONE_FLYING_CTM_DELIVERY_SUCCESS;
+				mothershipMessage.type = DRONE_PACKAGE_DELIVERED_SUCCESS;
 				// TODO: The client should do this
 				package_free(drone->package);
 			} else {
-				msg.type = DRONE_PACKAGE_DELIVERED_FAIL;
+				dashboardMessage.state = D_DRONE_FLYING_CTM_DELIVERY_FAIL;
+				mothershipMessage.type = DRONE_PACKAGE_DELIVERED_FAIL;
 			}
 
-			check(mq_send(drone->motherShip->msgQueueID, (char*)&msg, sizeof(MothershipMessage), 0), "failed to send a message to the mothership");
+			dashboard_sendMessage(global_dashboard, &dashboardMessage);
+			mothership_sendMessage(drone->motherShip, &mothershipMessage);
 
 			sleep(compute_sleep_time(drone));
 			drone->autonomy -= consumption;
 
-			msg.type= DRONE_BACK_TO_MOTHERSHIP;
-			check(mq_send(drone->motherShip->msgQueueID, (char*)&msg, sizeof(MothershipMessage), 0), "failed to send a message to the mothership");
+			dashboardMessage.state = D_DRONE_WAITING;
+			dashboard_sendMessage(global_dashboard, &dashboardMessage);
+
+			mothershipMessage.type = DRONE_BACK_TO_MOTHERSHIP;
+			mothership_sendMessage(drone->motherShip, &mothershipMessage);
 			break;
+		}
 		default:
-			LOG_INFO("[Drone %03d] TODO", drone->id);
-			//pthread_exit(NULL);
 			break;
 	}
+	return true;
 }
 
 unsigned int compute_sleep_time(Drone* drone) {
