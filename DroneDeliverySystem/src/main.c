@@ -1,13 +1,23 @@
 #include <stdio.h>
 #include <dashboard.h>
 #include <util.h>
+#include <signal.h>
 
 #include "typedefs.h"
 #include "drone.h"
 #include "mothership.h"
 #include "parser.h"
 
+static void signalHandler(int signal);
+
+void signalHandler(int signal) {
+	cc_setCursorVisibility(true);
+	exit(130);
+}
+
 int main() {
+	signal(SIGINT, &signalHandler);
+
 	//FIXME: test start
 	LinkedList* droneList = ll_createList();
 
