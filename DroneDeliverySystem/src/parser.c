@@ -12,7 +12,7 @@ LinkedList* loadDronesFromFile(FILE* file, Mothership* ship) {
 	unsigned int autonomy;
 	unsigned int rechargingTime;
 
-	while (fscanf(file, "%u,%u,%u,%u\n", &id, &maxLoad, &autonomy, &rechargingTime) != EOF) {
+	while(fscanf(file, "%u,%u,%u,%u\n", &id, &maxLoad, &autonomy, &rechargingTime) != EOF) {
 		ll_insertLast(list, drone_constructor(id, maxLoad, autonomy, rechargingTime, ship));
 	}
 
@@ -22,14 +22,15 @@ LinkedList* loadDronesFromFile(FILE* file, Mothership* ship) {
 LinkedList* loadPackagesFromFile(FILE* file) {
 	LinkedList* list = ll_createList();
 
+	unsigned int id;
 	int priority;
 	unsigned int weight;
 	unsigned int clientID;
 
-	while (fscanf(file, "%d,%u,%u\n", &priority, &weight, &clientID) != EOF) {
-		Package* package = package_constructor(priority, weight, clientID);
+	while(fscanf(file, "%u,%d,%u,%u\n", &id, &priority, &weight, &clientID) != EOF) {
+		Package* package = package_constructor(id, priority, weight, clientID);
 
-		ll_insertSorted(list, package, (int(*)(void*, void*))&package_comparator);
+		ll_insertSorted(list, package, (int (*)(void*, void*)) &package_comparator);
 	}
 
 	return list;
@@ -43,7 +44,7 @@ LinkedList* loadClientsFromFile(FILE* file) {
 	unsigned int packagesToReceive;
 	unsigned int targetInstalledTime;
 
-	while (fscanf(file, "%u,%u,%u,%u\n", &id, &distance, &packagesToReceive, &targetInstalledTime) != EOF) {
+	while(fscanf(file, "%u,%u,%u,%u\n", &id, &distance, &packagesToReceive, &targetInstalledTime) != EOF) {
 		ll_insertLast(list, client_constructor(id, distance, packagesToReceive, targetInstalledTime));
 	}
 
