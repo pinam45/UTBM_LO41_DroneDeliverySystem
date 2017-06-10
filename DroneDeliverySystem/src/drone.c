@@ -68,6 +68,12 @@ void drone_free(Drone* drone) {
 }
 
 void* drone_launch(Drone* drone) {
+	DashboardMessage dashboardMessage;
+	dashboardMessage.type = D_DRONE;
+	dashboardMessage.number = drone->id;
+	dashboardMessage.state = D_DRONE_WAITING;
+	dashboard_sendMessage(global_dashboard, &dashboardMessage);
+
 	DroneMessage droneMessage;
 	check((int) mq_receive(drone->msgQueueID, (char*) &droneMessage, sizeof(DroneMessage), 0), "mq_receive failed");
 	while(process_message(drone, &droneMessage)) {
