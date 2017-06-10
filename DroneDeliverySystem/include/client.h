@@ -19,7 +19,7 @@ Client* client_constructor(unsigned int id, unsigned int distance, unsigned int 
 
 void client_free(Client* client);
 
-void* client_launch(/* Client* */ void* client);
+void* client_launch(Client* client);
 
 void client_sendMessage(Client* client, ClientMessage* message);
 
