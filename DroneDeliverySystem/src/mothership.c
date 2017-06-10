@@ -91,6 +91,7 @@ void mothership_launch(Mothership* mothership) {
 		dashboardMessage.number = pkg->id;
 		dashboard_sendMessage(global_dashboard, &dashboardMessage);
 	}
+	ll_deleteIterator(packagesListIterator);
 
 	unsigned int dronesNumbers = ll_getSize(mothership->droneList);
 
