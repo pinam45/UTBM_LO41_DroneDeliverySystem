@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <util.h>
 #include <unistd.h> //FIXME: sleep for test
+#include <client.h>
 
 #include "drone_message.h"
 #include "mothership.h"
@@ -11,6 +12,7 @@
 static struct mq_attr attr;
 
 static void process_message(Drone* drone, DroneMessage* message);
+static unsigned int compute_sleep_time(Drone* drone);
 
 Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, Mothership* motherShip) {
 	Drone* drone = (Drone*) malloc(sizeof(Drone));
@@ -79,6 +81,7 @@ void drone_sendMessage(Drone* drone, DroneMessage* message) {
 unsigned int computePowerConsumption(Drone* drone, Package* package, double mothershipToClientDistance) {
 	return package->weight + (unsigned int) mothershipToClientDistance;
 }
+
 void process_message(Drone* drone, DroneMessage* message) {
 	switch (message->type) {
 		case MOTHERSHIP_END_OF_DELIVERY:
@@ -101,7 +104,10 @@ void process_message(Drone* drone, DroneMessage* message) {
 			break;
 		case MOTHERSHIP_GO_DELIVER_PACKAGE:
 			LOG_INFO("[Drone %03d] Package", drone->id);
-			//pthread_exit(NULL);
+			unsigned int consumption = computePowerConsumption(drone, drone->package, 5);
+
+			sleep(compute_sleep_time(drone));
+
 			MothershipMessage msg;
 			msg.sender_id = drone->id;
 			if (drone->id != 2) {
@@ -112,8 +118,10 @@ void process_message(Drone* drone, DroneMessage* message) {
 				msg.type = DRONE_PACKAGE_DELIVERED_FAIL;
 			}
 
-			sleep(1);
 			check(mq_send(drone->motherShip->msgQueueID, (char*)&msg, sizeof(MothershipMessage), 0), "failed to send a message to the mothership");
+
+			sleep(compute_sleep_time(drone));
+			drone->autonomy -= consumption;
 
 			msg.type= DRONE_BACK_TO_MOTHERSHIP;
 			check(mq_send(drone->motherShip->msgQueueID, (char*)&msg, sizeof(MothershipMessage), 0), "failed to send a message to the mothership");
@@ -123,4 +131,12 @@ void process_message(Drone* drone, DroneMessage* message) {
 			//pthread_exit(NULL);
 			break;
 	}
+}
+
+unsigned int compute_sleep_time(Drone* drone) {
+	// FIXME: The client isn't set.
+	//unsigned int distance = drone->client->distance / 4;
+	unsigned int distance = 4;
+
+	return distance > 0 ? 1 : distance;
 }

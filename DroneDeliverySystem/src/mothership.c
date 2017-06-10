@@ -159,7 +159,6 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 				ll_insertSorted(mothership->packageList, drone->package, (int(*)(void*, void*))&package_comparator);
 			}
 
-			drone->autonomy -= computePowerConsumption(drone, drone->package, 5);
 			if (!ll_isEmpty(mothership->packageList)) {
 				find_package(mothership, drone);
 			} else if (mothership->numberOfPackages == 0 || !has_at_least_one_package_valid(mothership)) {
@@ -170,9 +169,9 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 			}
 
 			if (!drone->deliverySucess && ll_getSize(mothership->availableDrones) > 1) {
-				Drone* drone = (Drone*)ll_getFirst(mothership->availableDrones);
-				removeAvailable(mothership, drone);
-				find_package(mothership, drone);
+				Drone* first_drone_available = (Drone*)ll_getFirst(mothership->availableDrones);
+				removeAvailable(mothership, first_drone_available);
+				find_package(mothership, first_drone_available);
 			}
 
 			break;
@@ -185,6 +184,9 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 			break;
 		case DRONE_PACKAGE_DELIVERED_FAIL:
 			LOG_INFO("[Mothership] Drone %03d failed", drone->id);
+			break;
+		case DRONE_DEAD:
+			ll_removeIt(droneIt);
 			break;
 		default:
 			break;
