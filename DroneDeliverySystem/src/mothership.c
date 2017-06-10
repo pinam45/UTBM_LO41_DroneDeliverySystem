@@ -177,6 +177,7 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 			break;
 		case DRONE_DONE_CHARGING:
 			if (ll_isEmpty(mothership->packageList)) {
+				insertAvailable(mothership, drone);
 				poweroff_drone(drone);
 			} else {
 				find_package(mothership, drone);
