@@ -10,16 +10,27 @@
 /**
  * @brief Represents a drone
  */
+
+typedef enum {
+	S_IN_MOTHERSHIP,
+	S_CHARGING_IN_MOTHERSHIP,
+	S_GOING_BACK_TO_MOTHERSHIP,
+	S_GOING_TO_CLIENT,
+	S_DEAD
+} State;
+
 struct drone {
 	unsigned int id;
 	unsigned int maxLoad; //!< max load of the drone.
 	unsigned int autonomy; //!< autonomy in minutes.
+	unsigned int maxAutonomy;
 	unsigned int rechargingTime; //!< recharging time in minutes.
 	mqd_t msgQueueID;
 	Mothership* motherShip;
 	Client* client;
 	Package* package;
 	bool deliverySucess;
+	State state;
 };
 
 Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, Mothership* motherShip);
@@ -38,6 +49,6 @@ void drone_sendMessage(Drone* drone, DroneMessage* message);
  *
  * @return the power consumption of the drone
  */
-unsigned int computePowerConsumption(Drone drone, Package package, double mothershipToClientDistance);
+unsigned int computePowerConsumption(Drone* drone, Package* package, double mothershipToClientDistance);
 
 #endif //UTBM_LO41_DRONEDELIVERYSYSTEM_DRONE_H

@@ -16,7 +16,7 @@ Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int aut
 	Drone* drone = (Drone*) malloc(sizeof(Drone));
 	drone->id = id;
 	drone->maxLoad = maxLoad;
-	drone->autonomy = autonomy;
+	drone->maxAutonomy = drone->autonomy = autonomy;
 	drone->rechargingTime = rechargingTime;
 
 	char buffer[10];
@@ -46,6 +46,7 @@ Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int aut
 	drone->client = NULL;
 	drone->package = NULL;
 	drone->deliverySucess = false;
+	drone->state = S_IN_MOTHERSHIP;
 
 	return drone;
 }
@@ -75,6 +76,9 @@ void drone_sendMessage(Drone* drone, DroneMessage* message) {
 	check(mq_send(drone->msgQueueID, (const char*) message, sizeof(DroneMessage), 0), "mq_send failed");
 }
 
+unsigned int computePowerConsumption(Drone* drone, Package* package, double mothershipToClientDistance) {
+	return package->weight + (unsigned int) mothershipToClientDistance;
+}
 void process_message(Drone* drone, DroneMessage* message) {
 	switch (message->type) {
 		case MOTHERSHIP_END_OF_DELIVERY:
@@ -83,11 +87,14 @@ void process_message(Drone* drone, DroneMessage* message) {
 			break;
 		case MOTHERSHIP_GO_RECHARGE:
 			{
-				printf("[Drone %03d] DODO", drone->id);
-				sleep(drone->rechargingTime); // TODO: Maybe the drone should waits messages.
+				LOG_INFO("[Drone %03d] Recharging battery", drone->id);
+				sleep(drone->rechargingTime);
+				drone->autonomy = drone->maxAutonomy;
 				MothershipMessage mothershipMessage;
 				mothershipMessage.sender_id = drone->id;
 				mothershipMessage.type = DRONE_DONE_CHARGING;
+
+				LOG_INFO("[Drone %03d] Battery charged", drone->id);
 
 				mothership_sendMessage(drone->motherShip, &mothershipMessage);
 			}
@@ -105,6 +112,7 @@ void process_message(Drone* drone, DroneMessage* message) {
 				msg.type = DRONE_PACKAGE_DELIVERED_FAIL;
 			}
 
+			sleep(1);
 			check(mq_send(drone->motherShip->msgQueueID, (char*)&msg, sizeof(MothershipMessage), 0), "failed to send a message to the mothership");
 
 			msg.type= DRONE_BACK_TO_MOTHERSHIP;

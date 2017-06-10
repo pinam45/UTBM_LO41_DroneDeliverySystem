@@ -9,6 +9,7 @@
 
 struct mothership {
 	LinkedList* droneList;
+	LinkedList* availableDrones;
 	LinkedList* clientList;
 	LinkedList* packageList;
 	mqd_t msgQueueID;

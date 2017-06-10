@@ -3,6 +3,7 @@
 #include <util.h>
 #include <unistd.h>  //FIXME: sleep for test
 #include <LinkedList.h>
+#include <client.h>
 
 #include "drone.h"
 #include "drone_message.h"
@@ -14,8 +15,9 @@ static int check_drone(void* droneId, void* drone);
 static void process_message(Mothership* mothership, MothershipMessage* message);
 static void find_package(Mothership* mothership, Drone* drone);
 static void poweroff_drone(Drone* drone);
-
-bool has_at_least_one_package_valid(Mothership* pMothership);
+static bool has_at_least_one_package_valid(Mothership* mothership);
+static void removeAvailable(Mothership* mothership, Drone* drone);
+static void insertAvailable(Mothership* mothership, Drone* drone);
 
 int check_drone(void* droneId, void* drone) {
 	return *((unsigned int*) droneId) == ((Drone*) drone)->id;
@@ -25,6 +27,7 @@ Mothership* mothership_constructor(LinkedList* droneList, LinkedList* clientList
 	Mothership* mothership = (Mothership*) malloc(sizeof(Mothership));
 
 	mothership->droneList = droneList;
+	mothership->availableDrones = ll_createList();
 	mothership->clientList = clientList;
 	mothership->packageList = packageList;
 	mothership->numberOfPackages = ll_getSize(packageList);
@@ -39,6 +42,9 @@ Mothership* mothership_constructor(LinkedList* droneList, LinkedList* clientList
 		const char* errorBuffer = "Could not create mothership";
 		perror(errorBuffer);
 
+		ll_deleteList(droneList);
+		ll_deleteList(clientList);
+		ll_deleteList(packageList);
 		free(mothership);
 		return NULL;
 	}
@@ -62,6 +68,7 @@ void mothership_free(Mothership* mothership) {
 	ll_deleteList(mothership->droneList);
 	ll_deleteList(mothership->packageList);
 	ll_deleteList(mothership->clientList);
+	ll_deleteListNoClean(mothership->availableDrones);
 
 	free(mothership);
 }
@@ -85,16 +92,19 @@ void mothership_launch(Mothership* mothership) {
 
 	ll_deleteIterator(listIterator);
 
-	while (mothership->numberOfPackages != 0 && has_at_least_one_package_valid(mothership)) {
+	while (ll_getSize(mothership->droneList) != ll_getSize(mothership->availableDrones)) {
+		LOG_INFO("[Mothership] %d/%d drones available", ll_getSize(mothership->availableDrones), ll_getSize(mothership->droneList));
 		MothershipMessage msg;
 		mq_receive(mothership->msgQueueID, (char*)&msg, sizeof(MothershipMessage), 0);
 		process_message(mothership, &msg);
 	}
 
 	listIterator = ll_firstIterator(mothership->droneList);
-	for(unsigned int i = 0; i < dronesNumbers; ++i) {
+	while (ll_hasNext(listIterator)) {
 		Drone* drone = ll_next(listIterator);
-		poweroff_drone(drone);
+		if (drone->state == S_IN_MOTHERSHIP) {
+			poweroff_drone(drone);
+		}
 	}
 
 	ll_deleteIterator(listIterator);
@@ -106,6 +116,10 @@ void mothership_launch(Mothership* mothership) {
 }
 
 bool has_at_least_one_package_valid(Mothership* mothership) {
+	if (mothership->numberOfPackages == 0) {
+		return false;
+	}
+
 	if (ll_isEmpty(mothership->packageList)) {
 		return true;
 	}
@@ -145,10 +159,20 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 				ll_insertSorted(mothership->packageList, drone->package, (int(*)(void*, void*))&package_comparator);
 			}
 
+			drone->autonomy -= computePowerConsumption(drone, drone->package, 5);
 			if (!ll_isEmpty(mothership->packageList)) {
 				find_package(mothership, drone);
-			} else if (mothership->numberOfPackages == 0) {
+			} else if (mothership->numberOfPackages == 0 || !has_at_least_one_package_valid(mothership)) {
+				insertAvailable(mothership, drone);
 				poweroff_drone(drone);
+			} else {
+				insertAvailable(mothership, drone);
+			}
+
+			if (!drone->deliverySucess && ll_getSize(mothership->availableDrones) > 1) {
+				Drone* drone = (Drone*)ll_getFirst(mothership->availableDrones);
+				removeAvailable(mothership, drone);
+				find_package(mothership, drone);
 			}
 
 			break;
@@ -172,6 +196,7 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 void poweroff_drone(Drone* drone) {
 	DroneMessage answer;
 	answer.type = MOTHERSHIP_END_OF_DELIVERY;
+	drone->state = S_DEAD;
 
 	drone_sendMessage(drone, &answer);
 }
@@ -182,9 +207,14 @@ void find_package(Mothership* mothership, Drone* drone) {
 	if (!ll_isEmpty(mothership->packageList)) {
 		LinkedListIterator* it = ll_firstIterator(mothership->packageList);
 
+		bool battery = false;
 		while (ll_hasNext(it) && pkg == NULL) {
 			Package* value = (Package*) ll_next(it);
-			if (value->weight <= drone->maxLoad && value->numberOfTryRemaining > 0) {
+			// FIXME
+			//Client* client = (Client*) ll_getElement(mothership->clientList, value->clientID);
+			battery = computePowerConsumption(drone, value, 5) < drone->autonomy;
+
+			if (value->weight <= drone->maxLoad && value->numberOfTryRemaining > 0 && drone->package != value && battery) {
 				pkg = value;
 			}
 		}
@@ -197,13 +227,43 @@ void find_package(Mothership* mothership, Drone* drone) {
 			ll_removeIt(it);
 
 			drone->package = pkg;
+			removeAvailable(mothership, drone);
+
 			drone_sendMessage(drone, &answer);
 		} else if (mothership->numberOfPackages == 0 || !has_at_least_one_package_valid(mothership)) {
+			insertAvailable(mothership, drone);
 			poweroff_drone(drone);
+		} else if (!battery && drone->maxAutonomy != drone->autonomy) {
+			DroneMessage answer;
+			answer.type = MOTHERSHIP_GO_RECHARGE;
+
+			drone->package = NULL;
+			drone_sendMessage(drone, &answer);
+		} else {
+			insertAvailable(mothership, drone);
 		}
 
 		ll_deleteIterator(it);
 	} else if (mothership->numberOfPackages == 0 || !has_at_least_one_package_valid(mothership)) {
+	    insertAvailable(mothership, drone);
 		poweroff_drone(drone);
+	} else {
+		insertAvailable(mothership, drone);
 	}
+}
+
+void removeAvailable(Mothership* mothership, Drone* drone) {
+	LinkedListIterator* itA = ll_findElement(mothership->availableDrones, drone, &check_drone);
+	if (itA != NULL) {
+		LOG_INFO("[Mothership] Drone %03d is not available", drone->id);
+		ll_removeIt(itA);
+	}
+
+	ll_deleteIterator(itA);
+}
+
+void insertAvailable(Mothership* mothership, Drone* drone) {
+	LOG_INFO("[Mothership] Drone %03d is available", drone->id);
+
+	ll_insertLast(mothership->availableDrones, drone);
 }

@@ -17,15 +17,15 @@ int main() {
 		printf("aaaa");
 	}
 
-	Drone* drone1 = drone_constructor(0, 10, 10, 10, mothership);
+	Drone* drone1 = drone_constructor(0, 10, 3, 2, mothership);
 	ll_insertLast(droneList, drone1);
-	Drone* drone2 = drone_constructor(1, 10, 10, 10, mothership);
+	Drone* drone2 = drone_constructor(1, 10, 4, 2, mothership);
 	ll_insertLast(droneList, drone2);
-	Drone* drone3 = drone_constructor(2, 10, 10, 10, mothership);
-	ll_insertLast(droneList, drone3);
-	Drone* drone4 = drone_constructor(3, 10, 10, 10, mothership);
+	//Drone* drone3 = drone_constructor(2, 10, 10, 2, mothership);
+	//ll_insertLast(droneList, drone3);
+	Drone* drone4 = drone_constructor(3, 10, 10, 2, mothership);
 	ll_insertLast(droneList, drone4);
-	Drone* drone5 = drone_constructor(4, 10, 10, 10, mothership);
+	Drone* drone5 = drone_constructor(4, 10, 6, 2, mothership);
 	ll_insertLast(droneList, drone5);
 
 	mothership_launch(mothership);
