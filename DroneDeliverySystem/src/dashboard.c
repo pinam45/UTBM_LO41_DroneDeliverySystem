@@ -12,19 +12,20 @@ static cc_Color main_fg_color = WHITE;
 #define DASHBOARD_ELEMENTS_TABLE(ENTRY)\
     ENTRY(D_DRONE_WAITING,                     YELLOW,  WHITE,   "Waiting")\
     ENTRY(D_DRONE_CHARGING,                    BLUE,    WHITE,   "Charging")\
-    ENTRY(D_DRONE_FLYING_MTC,                  CYAN,    WHITE,   "flying to client")\
-    ENTRY(D_DRONE_FLYING_CTM_DELIVERY_SUCCESS, GREEN,   WHITE,   "flying back")\
-    ENTRY(D_DRONE_FLYING_CTM_DELIVERY_FAIL,    RED,     WHITE,   "flying back")\
+    ENTRY(D_DRONE_FLYING_MTC,                  CYAN,    WHITE,   "Flying to client")\
+    ENTRY(D_DRONE_FLYING_CTM_DELIVERY_SUCCESS, GREEN,   WHITE,   "Flying back")\
+    ENTRY(D_DRONE_FLYING_CTM_DELIVERY_FAIL,    RED,     WHITE,   "Flying back")\
+    ENTRY(D_DRONE_DEAD,                        RED,     WHITE,   "Dead")\
     ENTRY(D_DRONE_FINISHED,                    WHITE,   BLACK,   "Finished")\
     ENTRY(D_CLIENT_WAITING,                    YELLOW,  WHITE,   "Waiting")\
     ENTRY(D_CLIENT_TARGET_OUT,                 CYAN,    WHITE,   "Target out")\
-    ENTRY(D_CLIENT_ABSENT,                     BLUE,    WHITE,   "Client absent")\
+    ENTRY(D_CLIENT_ABSENT,                     BLUE,    WHITE,   "Absent")\
     ENTRY(D_CLIENT_FINISHED,                   GREEN,   WHITE,   "Finished")\
     ENTRY(D_PACKAGE_WAITING,                   YELLOW,  WHITE,   "Waiting")\
     ENTRY(D_PACKAGE_FLYING,                    CYAN,    WHITE,   "Flying")\
     ENTRY(D_PACKAGE_SUCCESS,                   GREEN,   WHITE,   "Delivery success")\
     ENTRY(D_PACKAGE_FAIL,                      RED,     WHITE,   "Delivery fail")\
-    ENTRY(D_UNKNOWN,                           MAGENTA, WHITE,   "unknown")\
+    ENTRY(D_UNKNOWN,                           MAGENTA, WHITE,   "Unknown")\
 
 #define _EXPAND_AS_STATE(state, bg_color, fg_color, text) state,
 #define _EXPAND_AS_BG_COLOR(state, bg_color, fg_color, text) bg_color,
