@@ -81,6 +81,10 @@ void process_message(Client* client, ClientMessage* message) {
 				dashboardMessage.state = D_CLIENT_TARGET_OUT;
 				dashboard_sendMessage(global_dashboard, &dashboardMessage);
 			}
+			else {
+				dashboardMessage.state = D_CLIENT_ABSENT;
+				dashboard_sendMessage(global_dashboard, &dashboardMessage);
+			}
 			pthread_mutex_unlock(&(client->targetMutex));
 			LOG_INFO("Client %03d target installed", client->id);
 			break;
