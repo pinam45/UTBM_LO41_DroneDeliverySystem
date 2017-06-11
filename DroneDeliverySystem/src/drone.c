@@ -27,7 +27,7 @@ Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int aut
 	drone->client = NULL;
 	drone->package = NULL;
 	drone->deliverySuccess = false;
-	drone->state = S_IN_MOTHERSHIP;
+	drone->state = S_ALIVE;
 
 	check(pthread_mutex_init(&(drone->mutex), NULL),"Drone: pthread_mutex_init failed");
 
@@ -70,7 +70,7 @@ void drone_sendMessage(Drone* drone, DroneMessage* message) {
 }
 
 unsigned int computePowerConsumption(Drone* drone, Package* package, double mothershipToClientDistance) {
-	return package->weight + (unsigned int) mothershipToClientDistance;
+	return ((unsigned int)abs((int)package->weight - (int)drone->maxLoad) / 4) + (unsigned int) mothershipToClientDistance;
 }
 
 bool process_message(Drone* drone, DroneMessage* message) {
@@ -141,7 +141,6 @@ bool process_message(Drone* drone, DroneMessage* message) {
 				mothershipMessage.type = DRONE_PACKAGE_DELIVERED_FAIL;
 				drone->deliverySuccess = false;
 				if(drone->package->numberOfTryRemaining > 1){
-					--drone->package->numberOfTryRemaining;
 					clientMessage.type = DRONE_DELIVERY_FAILURE;
 				}
 				else{
@@ -174,8 +173,8 @@ bool process_message(Drone* drone, DroneMessage* message) {
 }
 
 unsigned int compute_sleep_time(Drone* drone) {
-	int distance = drone->client->distance - 1;
+	unsigned int distance = drone->client->distance - 1;
 	// minus 1 to send the target message 1s before arriving
 
-	return (unsigned int)(distance > 0 ? distance : 1);
+	return distance > 1 ? distance / 4 : 1;
 }

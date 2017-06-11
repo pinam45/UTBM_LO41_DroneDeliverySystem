@@ -15,7 +15,7 @@ Package* package_constructor(unsigned int id, int priority, unsigned int weight,
 }
 
 int package_comparator(Package* lhs, Package* rhs) {
-	return lhs->id - rhs->id;
+	return lhs->priority - rhs->priority;
 }
 
 void package_free(Package* package) {

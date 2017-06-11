@@ -7,18 +7,15 @@
 #include "package.h"
 #include "typedefs.h"
 
-/**
- * @brief Represents a drone
- */
 
 typedef enum {
-	S_IN_MOTHERSHIP,
-	S_CHARGING_IN_MOTHERSHIP,
-	S_GOING_BACK_TO_MOTHERSHIP,
-	S_GOING_TO_CLIENT,
+	S_ALIVE,
 	S_DEAD
 } State;
 
+/**
+ * @brief Represents a drone
+ */
 struct drone {
 	unsigned int id;
 	unsigned int maxLoad; //!< max load of the drone.
