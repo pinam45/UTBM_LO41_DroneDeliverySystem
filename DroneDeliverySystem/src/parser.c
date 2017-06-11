@@ -26,9 +26,10 @@ LinkedList* loadPackagesFromFile(FILE* file) {
 	int priority;
 	unsigned int weight;
 	unsigned int clientID;
+	unsigned int numberOfTryRemaining;
 
-	while(fscanf(file, "%u,%d,%u,%u\n", &id, &priority, &weight, &clientID) != EOF) {
-		Package* package = package_constructor(id, priority, weight, clientID);
+	while(fscanf(file, "%u,%d,%u,%u,%u\n", &id, &priority, &weight, &clientID, &numberOfTryRemaining) != EOF) {
+		Package* package = package_constructor(id, priority, weight, clientID, numberOfTryRemaining);
 
 		ll_insertSorted(list, package, (int (*)(void*, void*)) &package_comparator);
 	}

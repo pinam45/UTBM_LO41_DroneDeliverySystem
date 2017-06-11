@@ -14,7 +14,7 @@ struct package {
 	unsigned int numberOfTryRemaining;
 };
 
-Package* package_constructor(unsigned int id, int priority, unsigned int weight, unsigned int clientID);
+Package* package_constructor(unsigned int id, int priority, unsigned int weight, unsigned int clientID, unsigned int numberOfTryRemaining);
 
 int package_comparator(Package* lhs, Package* rhs);
 
