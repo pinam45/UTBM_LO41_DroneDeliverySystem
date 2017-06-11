@@ -12,8 +12,6 @@
 #include "log.h"
 #include "dashboard.h"
 
-static struct mq_attr attr;
-
 static void process_message(Client* client, ClientMessage* message);
 
 Client* client_constructor(unsigned int id, unsigned int distance, unsigned int packagesToReceive) {
@@ -26,43 +24,20 @@ Client* client_constructor(unsigned int id, unsigned int distance, unsigned int 
 
 	char buffer[11];
 	sprintf(buffer, "/client%03d", client->id);
-
+	struct mq_attr attr;
 	attr.mq_curmsgs = 0;
 	attr.mq_maxmsg = 10;
 	attr.mq_flags = 0;
 	attr.mq_msgsize = sizeof(ClientMessage);
-	if((client->msgQueueID = mq_open(buffer, O_RDWR | O_CREAT, 0660, &attr)) == -1) {
-		char errorBuffer[30];
-		sprintf(errorBuffer, "Could not create client %03d\n", client->id);
-		perror(errorBuffer);
-
-		free(client);
-		return NULL;
-	}
-
-	if(mq_unlink(buffer) == -1) {
-		mq_close(client->msgQueueID);
-		free(client);
-
-		return NULL;
-	}
+	check((client->msgQueueID = mq_open(buffer, O_RDWR | O_CREAT, 0660, &attr)),"Client: mq_open failed");
+	check(mq_unlink(buffer),"Client: mq_unlink failed");
 
 	return client;
 }
 
 void client_free(Client* client) {
-	int result = pthread_mutex_destroy(&(client->targetMutex));
-	if(result < 0) {
-		char errorBuffer[50];
-		sprintf(errorBuffer, "client %03d: pthread_mutex_destroy failed\n", client->id);
-		check(result, errorBuffer);
-	}
-	result = mq_close(client->msgQueueID);
-	if(result < 0) {
-		char errorBuffer[30];
-		sprintf(errorBuffer, "client %03d: mq_close failed\n", client->id);
-		check(result, errorBuffer);
-	}
+	check(pthread_mutex_destroy(&(client->targetMutex)), "Client: pthread_mutex_destroy failed");
+	check(mq_close(client->msgQueueID), "Client: mq_close failed");
 	free(client);
 }
 
@@ -82,7 +57,7 @@ void* client_launch(Client* client) {
 
 	dashboardMessage.state = D_CLIENT_FINISHED;
 	dashboard_sendMessage(global_dashboard, &dashboardMessage);
-	LOG_INFO("Client %03d end of delivery\n", client->id);
+	LOG_INFO("Client %03d end of delivery", client->id);
 	pthread_exit(0);
 }
 
@@ -103,7 +78,7 @@ void process_message(Client* client, ClientMessage* message) {
 
 			dashboardMessage.state = D_CLIENT_TARGET_OUT;
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
-			LOG_INFO("Client %03d target installed\n", client->id);
+			LOG_INFO("Client %03d target installed", client->id);
 			break;
 		case DRONE_DELIVERY_SUCCESS:
 			pthread_mutex_lock(&(client->targetMutex));
@@ -113,7 +88,7 @@ void process_message(Client* client, ClientMessage* message) {
 
 			dashboardMessage.state = D_CLIENT_WAITING;
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
-			LOG_INFO("Client %03d package received\n", client->id);
+			LOG_INFO("Client %03d package received", client->id);
 			break;
 		case DRONE_DELIVERY_FAILURE:
 			pthread_mutex_lock(&(client->targetMutex));
@@ -122,7 +97,7 @@ void process_message(Client* client, ClientMessage* message) {
 
 			dashboardMessage.state = D_CLIENT_WAITING;
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
-			LOG_INFO("Client %03d package not received\n", client->id);
+			LOG_INFO("Client %03d package not received", client->id);
 			break;
 		case DRONE_DELIVERY_FINAL_FAILURE:
 			pthread_mutex_lock(&(client->targetMutex));
@@ -132,7 +107,7 @@ void process_message(Client* client, ClientMessage* message) {
 
 			dashboardMessage.state = D_CLIENT_WAITING;
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
-			LOG_INFO("Client %03d package not received for the last time\n", client->id);
+			LOG_INFO("Client %03d package not received for the last time", client->id);
 			break;
 		case MOTHERSHIP_UNABLE_TO_SEND_PACKAGE:
 			pthread_mutex_lock(&(client->targetMutex));
@@ -142,7 +117,7 @@ void process_message(Client* client, ClientMessage* message) {
 
 			dashboardMessage.state = D_CLIENT_WAITING;
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
-			LOG_INFO("Client %03d can't be delivered.\n", client->id);
+			LOG_INFO("Client %03d can't be delivered", client->id);
 		default:
 			break;
 	}
