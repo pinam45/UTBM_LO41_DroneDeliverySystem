@@ -75,7 +75,7 @@ void process_message(Client* client, ClientMessage* message) {
 		case DRONE_PUT_TARGET:
 			pthread_mutex_lock(&(client->targetMutex));
 			++(client->nbrPackageFlying);
-			if (client->nbrPackageFlying == 1) {
+			if (client->nbrPackageFlying == 1 && (rand() % 5) != 0) { // Sometimes the client isn't here.
 				client->targetInstalled = true;
 
 				dashboardMessage.state = D_CLIENT_TARGET_OUT;

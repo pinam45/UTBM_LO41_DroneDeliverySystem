@@ -16,6 +16,7 @@ void signalHandler(int signal) {
 }
 
 int main() {
+	srand(0);
 	signal(SIGINT, &signalHandler);
 
 	//FIXME: test start
