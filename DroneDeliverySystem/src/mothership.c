@@ -11,8 +11,6 @@
 #include "mothership_message.h"
 #include "dashboard.h"
 
-static struct mq_attr attr;
-
 static int check_drone(void* droneId, void* drone);
 
 int check_client(void* clientId, void* client);
@@ -47,43 +45,23 @@ Mothership* mothership_constructor(LinkedList* droneList, LinkedList* clientList
 	mothership->numberOfPackages = ll_getSize(packageList);
 
 	const char* buffer = "/mothership";
-
+	struct mq_attr attr;
 	attr.mq_curmsgs = 0;
 	attr.mq_maxmsg = 10;
 	attr.mq_flags = 0;
 	attr.mq_msgsize = sizeof(MothershipMessage);
-	if((mothership->msgQueueID = mq_open(buffer, O_RDWR | O_CREAT, 0660, &attr)) == -1) {
-		const char* errorBuffer = "Could not create mothership";
-		perror(errorBuffer);
-
-		ll_deleteList(droneList);
-		ll_deleteList(clientList);
-		ll_deleteList(packageList);
-		free(mothership);
-		return NULL;
-	}
-
-	if(mq_unlink(buffer) == -1) {
-		mq_close(mothership->msgQueueID);
-		free(mothership);
-
-		return NULL;
-	}
+	check((mothership->msgQueueID = mq_open(buffer, O_RDWR | O_CREAT, 0660, &attr)), "Mothership: mq_open failed");
+	check(mq_unlink(buffer), "Mothership: mq_unlink failed");
 
 	return mothership;
 }
 
 void mothership_free(Mothership* mothership) {
-	if(mq_close(mothership->msgQueueID) == -1) {
-		const char* errorBuffer = "Could not destroy mothership";
-		perror(errorBuffer);
-	}
-
 	ll_deleteList(mothership->droneList);
 	ll_deleteList(mothership->packageList);
 	ll_deleteList(mothership->clientList);
 	ll_deleteListNoClean(mothership->availableDrones);
-
+	check(mq_close(mothership->msgQueueID), "Mothership: mq_close failed");
 	free(mothership);
 }
 
