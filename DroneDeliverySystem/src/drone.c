@@ -125,7 +125,7 @@ bool process_message(Drone* drone, DroneMessage* message) {
 			pthread_mutex_lock(&(drone->mutex));
 			client_sendMessage(drone->client, &clientMessage);
 			pthread_mutex_unlock(&(drone->mutex));
-			sleep(1);
+			sleep(1); // Wait the client before considering him as absent.
 
 			MothershipMessage mothershipMessage;
 			mothershipMessage.sender_id = drone->id;

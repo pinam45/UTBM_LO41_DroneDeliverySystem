@@ -239,16 +239,17 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 			break;
 		case DRONE_PACKAGE_DELIVERED_FAIL:
 			pthread_mutex_lock(&(drone->mutex));
-			drone->deliverySuccess = false;
 			dashboardMessage.number = drone->package->id;
 			pthread_mutex_unlock(&(drone->mutex));
 			dashboardMessage.state = D_PACKAGE_FAIL;
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 			LOG_INFO("[Mothership] Drone %03d failed", drone->id);
 
+			pthread_mutex_lock(&(drone->mutex));
 			if (drone->package->numberOfTryRemaining > 0) {
 				--(drone->package->numberOfTryRemaining);
 			}
+			pthread_mutex_unlock(&(drone->mutex));
 
 			break;
 		case DRONE_DEAD:
