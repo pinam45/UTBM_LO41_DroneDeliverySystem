@@ -41,7 +41,7 @@ Mothership* mothership_constructor(LinkedList* droneList, LinkedList* clientList
 	Mothership* mothership = (Mothership*) malloc(sizeof(Mothership));
 
 	mothership->droneList = droneList;
-	mothership->availableDrones = ll_createList();
+	mothership->availableDrones = ll_createList(NULL);
 	mothership->clientList = clientList;
 	mothership->packageList = packageList;
 	mothership->numberOfPackages = ll_getSize(packageList);

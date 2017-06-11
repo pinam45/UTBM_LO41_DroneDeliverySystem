@@ -21,12 +21,13 @@
 #include <LinkedList.h>
 
 ////////////////////////////////////////////////////////////
-LinkedList* ll_createList() {
+LinkedList* ll_createList(void (*freeData)(void*)) {
 	LinkedList* list = (LinkedList*) malloc(sizeof(LinkedList));
 	list->sentinel = (LinkedListNode*) malloc(sizeof(LinkedListNode));
 	list->sentinel->next = list->sentinel;
 	list->sentinel->previous = list->sentinel;
 	list->size = 0;
+	list->freeData = freeData;
 	return list;
 }
 
@@ -35,7 +36,7 @@ void ll_deleteList(LinkedList* list) {
 	LinkedListNode* tmpNode = list->sentinel->next;
 	while(tmpNode != list->sentinel) {
 		tmpNode = tmpNode->next;
-		free(tmpNode->previous->value);
+		(*list->freeData)(tmpNode->previous->value);
 		free(tmpNode->previous);
 	}
 	free(list->sentinel);
@@ -142,7 +143,7 @@ bool ll_removeFirst(LinkedList* list) {
 		LinkedListNode* listNode = list->sentinel->next;
 		list->sentinel->next = listNode->next;
 		listNode->next->previous = list->sentinel;
-		free(listNode->value);
+		(*list->freeData)(listNode->value);
 		free(listNode);
 		--list->size;
 		return true;
@@ -157,7 +158,7 @@ bool ll_removeLast(LinkedList* list) {
 		LinkedListNode* listNode = list->sentinel->previous;
 		list->sentinel->previous = listNode->previous;
 		listNode->previous->next = list->sentinel;
-		free(listNode->value);
+		(*list->freeData)(listNode->value);
 		free(listNode);
 		--list->size;
 		return true;
@@ -172,7 +173,7 @@ bool ll_removeElement(LinkedList* list, unsigned int elementPosition) {
 	if(listNode) {
 		listNode->previous->next = listNode->next;
 		listNode->next->previous = listNode->previous;
-		free(listNode->value);
+		(*list->freeData)(listNode->value);
 		free(listNode);
 		--list->size;
 		return true;

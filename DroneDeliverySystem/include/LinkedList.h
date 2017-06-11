@@ -59,6 +59,7 @@ typedef struct elem {
 typedef struct {
 	LinkedListNode* sentinel; /**< Pointer on sentinel node */
 	unsigned int size; /**< LinkedList size */
+	void (*freeData)(void*);
 } LinkedList;
 
 /*-------------------------------------------------------------------------*//**
@@ -76,7 +77,7 @@ typedef struct {
  *
  * @return     The newly created LinkedList.
  */
-LinkedList* ll_createList();
+LinkedList* ll_createList(void (*freeData)(void*));
 
 /*-------------------------------------------------------------------------*//**
  * @brief      Delete the given list and free the LinkedList pointer.

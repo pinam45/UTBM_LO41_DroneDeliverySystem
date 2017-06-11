@@ -19,7 +19,7 @@ int main() {
 	signal(SIGINT, &signalHandler);
 
 	//FIXME: test start
-	LinkedList* droneList = ll_createList();
+	LinkedList* droneList = ll_createList((void(*)(void*))&drone_free);
 
 	FILE* clientsFile = fopen("Clients.txt", "r");
 	if(clientsFile == NULL) {

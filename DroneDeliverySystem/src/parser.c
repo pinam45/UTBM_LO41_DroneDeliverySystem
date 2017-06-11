@@ -5,7 +5,7 @@
 #include "client.h"
 
 LinkedList* loadDronesFromFile(FILE* file, Mothership* ship) {
-	LinkedList* list = ll_createList();
+	LinkedList* list = ll_createList((void(*)(void*))&drone_free);
 
 	unsigned int id;
 	unsigned int maxLoad;
@@ -20,7 +20,7 @@ LinkedList* loadDronesFromFile(FILE* file, Mothership* ship) {
 }
 
 LinkedList* loadPackagesFromFile(FILE* file) {
-	LinkedList* list = ll_createList();
+	LinkedList* list = ll_createList((void(*)(void*))&package_free);
 
 	unsigned int id;
 	int priority;
@@ -37,7 +37,7 @@ LinkedList* loadPackagesFromFile(FILE* file) {
 }
 
 LinkedList* loadClientsFromFile(FILE* file) {
-	LinkedList* list = ll_createList();
+	LinkedList* list = ll_createList((void(*)(void*))&client_free);
 
 	unsigned int id;
 	unsigned int distance;
