@@ -225,7 +225,6 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 
 			LOG_INFO("[Mothership] Drone %03d succeed", drone->id);
-			drone->deliverySucess = true;
 			free(drone->package);
 			--(mothership->numberOfPackages);
 			break;
