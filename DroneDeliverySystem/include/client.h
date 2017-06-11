@@ -10,12 +10,12 @@ struct client {
 	unsigned int id;
 	unsigned int distance;
 	unsigned int packagesToReceive;
-	unsigned int targetInstalledTime;
 	bool targetInstalled;
+	pthread_mutex_t targetMutex;
 	mqd_t msgQueueID;
 };
 
-Client* client_constructor(unsigned int id, unsigned int distance, unsigned int packagesToReceive, unsigned int targetInstalledTime);
+Client* client_constructor(unsigned int id, unsigned int distance, unsigned int packagesToReceive);
 
 void client_free(Client* client);
 

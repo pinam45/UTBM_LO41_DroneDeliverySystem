@@ -138,7 +138,8 @@ bool process_message(Drone* drone, DroneMessage* message) {
 
 			MothershipMessage mothershipMessage;
 			mothershipMessage.sender_id = drone->id;
-			if(drone->client->targetInstalled) { //TODO: mutex on client
+			pthread_mutex_lock(&(drone->client->targetMutex));
+			if(drone->client->targetInstalled) {
 				dashboardMessage.state = D_DRONE_FLYING_CTM_DELIVERY_SUCCESS;
 				mothershipMessage.type = DRONE_PACKAGE_DELIVERED_SUCCESS;
 				clientMessage.type = DRONE_DELIVERY_SUCCESS;
@@ -153,6 +154,7 @@ bool process_message(Drone* drone, DroneMessage* message) {
 					clientMessage.type = DRONE_DELIVERY_FINAL_FAILURE;
 				}
 			}
+			pthread_mutex_unlock(&(drone->client->targetMutex));
 
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 			mothership_sendMessage(drone->motherShip, &mothershipMessage);

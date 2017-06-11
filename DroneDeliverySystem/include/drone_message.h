@@ -5,7 +5,6 @@ typedef enum drone_message_type {
 	MOTHERSHIP_GO_DELIVER_PACKAGE,
 	MOTHERSHIP_GO_RECHARGE,
 	MOTHERSHIP_END_OF_DELIVERY
-	//TODO
 } DroneMessageType;
 
 struct drone_message {

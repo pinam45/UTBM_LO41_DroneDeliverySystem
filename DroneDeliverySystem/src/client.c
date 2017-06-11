@@ -16,14 +16,13 @@ static struct mq_attr attr;
 
 static void process_message(Client* client, ClientMessage* message);
 
-Client* client_constructor(unsigned int id, unsigned int distance, unsigned int packagesToReceive,
-                           unsigned int targetInstalledTime) {
+Client* client_constructor(unsigned int id, unsigned int distance, unsigned int packagesToReceive) {
 	Client* client = (Client*) malloc(sizeof(Client));
 	client->id = id;
 	client->distance = distance;
 	client->packagesToReceive = packagesToReceive;
-	client->targetInstalledTime = targetInstalledTime;
 	client->targetInstalled = false;
+	check(pthread_mutex_init(&(client->targetMutex), NULL),"Client: pthread_mutex_init failed");
 
 	char buffer[11];
 	sprintf(buffer, "/client%03d", client->id);
@@ -52,7 +51,13 @@ Client* client_constructor(unsigned int id, unsigned int distance, unsigned int 
 }
 
 void client_free(Client* client) {
-	int result = mq_close(client->msgQueueID);
+	int result = pthread_mutex_destroy(&(client->targetMutex));
+	if(result < 0) {
+		char errorBuffer[50];
+		sprintf(errorBuffer, "client %03d: pthread_mutex_destroy failed\n", client->id);
+		check(result, errorBuffer);
+	}
+	result = mq_close(client->msgQueueID);
 	if(result < 0) {
 		char errorBuffer[30];
 		sprintf(errorBuffer, "client %03d: mq_close failed\n", client->id);
@@ -92,14 +97,18 @@ void process_message(Client* client, ClientMessage* message) {
 
 	switch(message->type) {
 		case DRONE_PUT_TARGET:
+			pthread_mutex_lock(&(client->targetMutex));
 			client->targetInstalled = true;
+			pthread_mutex_unlock(&(client->targetMutex));
 
 			dashboardMessage.state = D_CLIENT_TARGET_OUT;
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 			LOG_INFO("Client %03d target installed\n", client->id);
 			break;
 		case DRONE_DELIVERY_SUCCESS:
+			pthread_mutex_lock(&(client->targetMutex));
 			client->targetInstalled = false;
+			pthread_mutex_unlock(&(client->targetMutex));
 			--(client->packagesToReceive);
 
 			dashboardMessage.state = D_CLIENT_WAITING;
@@ -107,14 +116,18 @@ void process_message(Client* client, ClientMessage* message) {
 			LOG_INFO("Client %03d package received\n", client->id);
 			break;
 		case DRONE_DELIVERY_FAILURE:
+			pthread_mutex_lock(&(client->targetMutex));
 			client->targetInstalled = false;
+			pthread_mutex_unlock(&(client->targetMutex));
 
 			dashboardMessage.state = D_CLIENT_WAITING;
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 			LOG_INFO("Client %03d package not received\n", client->id);
 			break;
 		case DRONE_DELIVERY_FINAL_FAILURE:
+			pthread_mutex_lock(&(client->targetMutex));
 			client->targetInstalled = false;
+			pthread_mutex_unlock(&(client->targetMutex));
 			--(client->packagesToReceive);
 
 			dashboardMessage.state = D_CLIENT_WAITING;
@@ -122,7 +135,9 @@ void process_message(Client* client, ClientMessage* message) {
 			LOG_INFO("Client %03d package not received for the last time\n", client->id);
 			break;
 		case MOTHERSHIP_UNABLE_TO_SEND_PACKAGE:
+			pthread_mutex_lock(&(client->targetMutex));
 			client->targetInstalled = false;
+			pthread_mutex_unlock(&(client->targetMutex));
 			--(client->packagesToReceive);
 
 			dashboardMessage.state = D_CLIENT_WAITING;

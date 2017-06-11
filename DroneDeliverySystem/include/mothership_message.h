@@ -7,7 +7,6 @@ typedef enum mothership_message_type {
 	DRONE_PACKAGE_DELIVERED_SUCCESS,
 	DRONE_PACKAGE_DELIVERED_FAIL,
 	DRONE_DEAD,
-	//TODO
 } MothershipMessageType;
 
 struct mothership_message {
