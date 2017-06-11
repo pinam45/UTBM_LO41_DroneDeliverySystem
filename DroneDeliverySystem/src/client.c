@@ -20,6 +20,7 @@ Client* client_constructor(unsigned int id, unsigned int distance, unsigned int 
 	client->distance = distance;
 	client->packagesToReceive = packagesToReceive;
 	client->targetInstalled = false;
+	client->nbrPackageFlying = 0;
 	check(pthread_mutex_init(&(client->targetMutex), NULL),"Client: pthread_mutex_init failed");
 
 	char buffer[11];
@@ -73,16 +74,22 @@ void process_message(Client* client, ClientMessage* message) {
 	switch(message->type) {
 		case DRONE_PUT_TARGET:
 			pthread_mutex_lock(&(client->targetMutex));
-			client->targetInstalled = true;
-			pthread_mutex_unlock(&(client->targetMutex));
+			++(client->nbrPackageFlying);
+			if (client->nbrPackageFlying == 1) {
+				client->targetInstalled = true;
 
-			dashboardMessage.state = D_CLIENT_TARGET_OUT;
-			dashboard_sendMessage(global_dashboard, &dashboardMessage);
+				dashboardMessage.state = D_CLIENT_TARGET_OUT;
+				dashboard_sendMessage(global_dashboard, &dashboardMessage);
+			}
+			pthread_mutex_unlock(&(client->targetMutex));
 			LOG_INFO("Client %03d target installed", client->id);
 			break;
 		case DRONE_DELIVERY_SUCCESS:
 			pthread_mutex_lock(&(client->targetMutex));
-			client->targetInstalled = false;
+			--(client->nbrPackageFlying);
+			if (client->nbrPackageFlying == 0) {
+				client->targetInstalled = false;
+			}
 			pthread_mutex_unlock(&(client->targetMutex));
 			--(client->packagesToReceive);
 
@@ -92,7 +99,10 @@ void process_message(Client* client, ClientMessage* message) {
 			break;
 		case DRONE_DELIVERY_FAILURE:
 			pthread_mutex_lock(&(client->targetMutex));
-			client->targetInstalled = false;
+			--(client->nbrPackageFlying);
+			if (client->nbrPackageFlying == 0) {
+				client->targetInstalled = false;
+			}
 			pthread_mutex_unlock(&(client->targetMutex));
 
 			dashboardMessage.state = D_CLIENT_WAITING;

@@ -12,6 +12,7 @@ struct client {
 	unsigned int packagesToReceive;
 	bool targetInstalled;
 	pthread_mutex_t targetMutex;
+	unsigned int nbrPackageFlying;
 	mqd_t msgQueueID;
 };
 
