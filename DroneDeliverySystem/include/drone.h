@@ -25,12 +25,13 @@ struct drone {
 	unsigned int autonomy; //!< autonomy in minutes.
 	unsigned int maxAutonomy;
 	unsigned int rechargingTime; //!< recharging time in minutes.
-	mqd_t msgQueueID;
 	Mothership* motherShip;
 	Client* client;
 	Package* package;
 	bool deliverySuccess;
 	State state;
+	mqd_t msgQueueID;
+	pthread_mutex_t mutex;
 };
 
 Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int autonomy, unsigned int rechargingTime, Mothership* motherShip);

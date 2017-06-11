@@ -12,8 +12,6 @@
 #include "mothership.h"
 #include "mothership_message.h"
 
-static struct mq_attr attr;
-
 static bool process_message(Drone* drone, DroneMessage* message);
 
 static unsigned int compute_sleep_time(Drone* drone);
@@ -25,46 +23,30 @@ Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int aut
 	drone->maxLoad = maxLoad;
 	drone->maxAutonomy = drone->autonomy = autonomy;
 	drone->rechargingTime = rechargingTime;
-
-	char buffer[10];
-	sprintf(buffer, "/drone%03d", drone->id);
-
-	attr.mq_curmsgs = 0;
-	attr.mq_maxmsg = 10;
-	attr.mq_flags = 0;
-	attr.mq_msgsize = sizeof(DroneMessage);
-	if((drone->msgQueueID = mq_open(buffer, O_RDWR | O_CREAT, 0660, &attr)) == -1) {
-		char errorBuffer[30];
-		sprintf(errorBuffer, "Could not create drone %03d", drone->id);
-		perror(errorBuffer);
-
-		free(drone);
-		return NULL;
-	}
-
-	if(mq_unlink(buffer) == -1) {
-		mq_close(drone->msgQueueID);
-		free(drone);
-
-		return NULL;
-	}
-
 	drone->motherShip = motherShip;
 	drone->client = NULL;
 	drone->package = NULL;
 	drone->deliverySuccess = false;
 	drone->state = S_IN_MOTHERSHIP;
 
+	check(pthread_mutex_init(&(drone->mutex), NULL),"Drone: pthread_mutex_init failed");
+
+	char buffer[10];
+	sprintf(buffer, "/drone%03d", drone->id);
+	struct mq_attr attr;
+	attr.mq_curmsgs = 0;
+	attr.mq_maxmsg = 10;
+	attr.mq_flags = 0;
+	attr.mq_msgsize = sizeof(DroneMessage);
+	check((drone->msgQueueID = mq_open(buffer, O_RDWR | O_CREAT, 0660, &attr)), "Drone: mq_open failed");
+	check(mq_unlink(buffer), "Drone: mq_unlink failed");
+
 	return drone;
 }
 
 void drone_free(Drone* drone) {
-	if(mq_close(drone->msgQueueID) == -1) {
-		char errorBuffer[30];
-		sprintf(errorBuffer, "Could not destroy drone %03d", drone->id);
-		perror(errorBuffer);
-	}
-
+	check(pthread_mutex_destroy(&(drone->mutex)),"Drone: pthread_mutex_destroy failed");
+	check(mq_close(drone->msgQueueID),"Drone: mq_close failed");
 	free(drone);
 }
 
@@ -101,7 +83,9 @@ bool process_message(Drone* drone, DroneMessage* message) {
 			dashboardMessage.state = D_DRONE_FINISHED;
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 
+			pthread_mutex_lock(&(drone->mutex));
 			drone->state = S_DEAD;
+			pthread_mutex_unlock(&(drone->mutex));
 			LOG_INFO("[Drone %03d] poweroff", drone->id);
 			return false;
 		}
@@ -111,7 +95,9 @@ bool process_message(Drone* drone, DroneMessage* message) {
 
 			LOG_INFO("[Drone %03d] Recharging battery", drone->id);
 			sleep(drone->rechargingTime);
+			pthread_mutex_lock(&(drone->mutex));
 			drone->autonomy = drone->maxAutonomy;
+			pthread_mutex_unlock(&(drone->mutex));
 
 			LOG_INFO("[Drone %03d] Battery charged", drone->id);
 
@@ -129,16 +115,21 @@ bool process_message(Drone* drone, DroneMessage* message) {
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 
 			LOG_INFO("[Drone %03d] Package", drone->id);
+			pthread_mutex_lock(&(drone->mutex));
 			unsigned int consumption = computePowerConsumption(drone, drone->package, 5);
+			pthread_mutex_unlock(&(drone->mutex));
 
 			sleep(compute_sleep_time(drone));
 			ClientMessage clientMessage;
 			clientMessage.type = DRONE_PUT_TARGET;
+			pthread_mutex_lock(&(drone->mutex));
 			client_sendMessage(drone->client, &clientMessage);
+			pthread_mutex_unlock(&(drone->mutex));
 			sleep(1);
 
 			MothershipMessage mothershipMessage;
 			mothershipMessage.sender_id = drone->id;
+			pthread_mutex_lock(&(drone->mutex));
 			pthread_mutex_lock(&(drone->client->targetMutex));
 			if(drone->client->targetInstalled) {
 				dashboardMessage.state = D_DRONE_FLYING_CTM_DELIVERY_SUCCESS;
@@ -158,13 +149,16 @@ bool process_message(Drone* drone, DroneMessage* message) {
 				}
 			}
 			pthread_mutex_unlock(&(drone->client->targetMutex));
+			pthread_mutex_unlock(&(drone->mutex));
 
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 			mothership_sendMessage(drone->motherShip, &mothershipMessage);
 			client_sendMessage(drone->client, &clientMessage);
 
 			sleep(compute_sleep_time(drone));
+			pthread_mutex_lock(&(drone->mutex));
 			drone->autonomy -= consumption;
+			pthread_mutex_unlock(&(drone->mutex));
 
 			dashboardMessage.state = D_DRONE_WAITING;
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
