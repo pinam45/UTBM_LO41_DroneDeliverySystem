@@ -282,8 +282,6 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 void poweroff_drone(Drone* drone) {
 	DroneMessage answer;
 	answer.type = MOTHERSHIP_END_OF_DELIVERY;
-	drone->state = S_DEAD;
-
 	drone_sendMessage(drone, &answer);
 }
 

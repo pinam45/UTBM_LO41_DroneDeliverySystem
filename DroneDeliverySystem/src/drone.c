@@ -101,6 +101,7 @@ bool process_message(Drone* drone, DroneMessage* message) {
 			dashboardMessage.state = D_DRONE_FINISHED;
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
 
+			drone->state = S_DEAD;
 			LOG_INFO("[Drone %03d] poweroff", drone->id);
 			return false;
 		}
