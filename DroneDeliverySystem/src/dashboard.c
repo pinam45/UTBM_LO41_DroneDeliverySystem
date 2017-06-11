@@ -256,19 +256,8 @@ Dashboard* dashboard_constructor(unsigned int packagesNumber, unsigned int drone
 	attr.mq_maxmsg = 10;
 	attr.mq_flags = 0;
 	attr.mq_msgsize = sizeof(DashboardMessage);
-	if((dashboard->msgQueueID = mq_open("/dashboard", O_RDWR | O_CREAT, 0660, &attr)) == -1) {
-		perror("Could not create dashboard");
-		free(dashboard);
-		return NULL;
-	}
-
-	if(mq_unlink("/dashboard") == -1) {
-		perror("Could not create dashboard");
-		mq_close(dashboard->msgQueueID);
-		free(dashboard);
-
-		return NULL;
-	}
+	check((dashboard->msgQueueID = mq_open("/dashboard", O_RDWR | O_CREAT, 0660, &attr)), "Dashboard: mq_open failed");
+	check(mq_unlink("/dashboard"), "Dashboard: mq_unlink failed");
 
 	dashboard->packagesNumber = packagesNumber;
 	dashboard->dronesNumber = dronesNumber;
@@ -348,7 +337,7 @@ void dashboard_free(Dashboard* dashboard) {
 	free(dashboard->packagesPos);
 	free(dashboard->dronesPos);
 	free(dashboard->clientsPos);
-	check(mq_close(dashboard->msgQueueID), "dashboard: mq_close failed\n");
+	check(mq_close(dashboard->msgQueueID), "Dashboard: mq_close failed\n");
 	free(dashboard);
 }
 
