@@ -29,7 +29,7 @@ struct drone {
 	Mothership* motherShip;
 	Client* client;
 	Package* package;
-	bool deliverySucess;
+	bool deliverySuccess;
 	State state;
 };
 

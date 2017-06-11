@@ -230,7 +230,7 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 			break;
 		case DRONE_BACK_TO_MOTHERSHIP:
 			LOG_INFO("[Mothership] Drone %03d back", drone->id);
-			if(!drone->deliverySucess) {
+			if(!drone->deliverySuccess) {
 				dashboardMessage.number = drone->package->id;
 				dashboardMessage.state = D_PACKAGE_WAITING;
 				dashboard_sendMessage(global_dashboard, &dashboardMessage);
@@ -248,7 +248,7 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 				insertAvailable(mothership, drone);
 			}
 
-			if(!drone->deliverySucess && ll_getSize(mothership->availableDrones) > 0) {
+			if(!drone->deliverySuccess && ll_getSize(mothership->availableDrones) > 0) {
 				Drone* first_drone_available = (Drone*) ll_getFirst(mothership->availableDrones);
 				removeAvailable(mothership, first_drone_available);
 				find_package(mothership, first_drone_available);

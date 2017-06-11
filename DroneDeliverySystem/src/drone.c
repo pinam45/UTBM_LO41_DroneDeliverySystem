@@ -52,7 +52,7 @@ Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int aut
 	drone->motherShip = motherShip;
 	drone->client = NULL;
 	drone->package = NULL;
-	drone->deliverySucess = false;
+	drone->deliverySuccess = false;
 	drone->state = S_IN_MOTHERSHIP;
 
 	return drone;
@@ -144,11 +144,11 @@ bool process_message(Drone* drone, DroneMessage* message) {
 				dashboardMessage.state = D_DRONE_FLYING_CTM_DELIVERY_SUCCESS;
 				mothershipMessage.type = DRONE_PACKAGE_DELIVERED_SUCCESS;
 				clientMessage.type = DRONE_DELIVERY_SUCCESS;
-				drone->deliverySucess = true;
+				drone->deliverySuccess = true;
 			} else {
 				dashboardMessage.state = D_DRONE_FLYING_CTM_DELIVERY_FAIL;
 				mothershipMessage.type = DRONE_PACKAGE_DELIVERED_FAIL;
-				drone->deliverySucess = false;
+				drone->deliverySuccess = false;
 				if(drone->package->numberOfTryRemaining > 1){
 					--drone->package->numberOfTryRemaining;
 					clientMessage.type = DRONE_DELIVERY_FAILURE;
