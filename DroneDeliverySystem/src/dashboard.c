@@ -20,7 +20,8 @@ static cc_Color main_fg_color = WHITE;
     ENTRY(D_CLIENT_WAITING,                    YELLOW,  WHITE,   "Waiting")\
     ENTRY(D_CLIENT_TARGET_OUT,                 CYAN,    WHITE,   "Target out")\
     ENTRY(D_CLIENT_ABSENT,                     BLUE,    WHITE,   "Absent")\
-    ENTRY(D_CLIENT_FINISHED,                   GREEN,   WHITE,   "Finished")\
+    ENTRY(D_CLIENT_FINISHED_COMPLETE,          GREEN,   WHITE,   "Finished")\
+    ENTRY(D_CLIENT_FINISHED_INCOMPLETE,        RED,     WHITE,   "Finished")\
     ENTRY(D_PACKAGE_WAITING,                   YELLOW,  WHITE,   "Waiting")\
     ENTRY(D_PACKAGE_FLYING,                    CYAN,    WHITE,   "Flying")\
     ENTRY(D_PACKAGE_SUCCESS,                   GREEN,   WHITE,   "Delivery success")\

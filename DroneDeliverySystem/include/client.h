@@ -10,6 +10,7 @@ struct client {
 	unsigned int id;
 	unsigned int distance;
 	unsigned int packagesToReceive;
+	bool packagesFailed;
 	bool targetInstalled;
 	pthread_mutex_t targetMutex;
 	unsigned int nbrPackageFlying;

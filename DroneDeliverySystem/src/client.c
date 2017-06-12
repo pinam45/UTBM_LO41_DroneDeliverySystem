@@ -19,6 +19,7 @@ Client* client_constructor(unsigned int id, unsigned int distance, unsigned int 
 	client->id = id;
 	client->distance = distance;
 	client->packagesToReceive = packagesToReceive;
+	client->packagesFailed = false;
 	client->targetInstalled = false;
 	client->nbrPackageFlying = 0;
 	check(pthread_mutex_init(&(client->targetMutex), NULL),"Client: pthread_mutex_init failed");
@@ -56,7 +57,12 @@ void* client_launch(Client* client) {
 		process_message(client, &clientMessage);
 	}
 
-	dashboardMessage.state = D_CLIENT_FINISHED;
+	if(client->packagesFailed){
+		dashboardMessage.state = D_CLIENT_FINISHED_INCOMPLETE;
+	}
+	else{
+		dashboardMessage.state = D_CLIENT_FINISHED_COMPLETE;
+	}
 	dashboard_sendMessage(global_dashboard, &dashboardMessage);
 	LOG_INFO("Client %03d end of delivery", client->id);
 	pthread_exit(0);
@@ -118,6 +124,7 @@ void process_message(Client* client, ClientMessage* message) {
 			client->targetInstalled = false;
 			pthread_mutex_unlock(&(client->targetMutex));
 			--(client->packagesToReceive);
+			client->packagesFailed = true;
 
 			dashboardMessage.state = D_CLIENT_WAITING;
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
@@ -128,6 +135,7 @@ void process_message(Client* client, ClientMessage* message) {
 			client->targetInstalled = false;
 			pthread_mutex_unlock(&(client->targetMutex));
 			--(client->packagesToReceive);
+			client->packagesFailed = true;
 
 			dashboardMessage.state = D_CLIENT_WAITING;
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);

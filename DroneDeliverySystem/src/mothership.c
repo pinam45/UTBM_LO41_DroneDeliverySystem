@@ -77,7 +77,7 @@ void mothership_launch(Mothership* mothership) {
 	dashboardMessage.type = D_PACKAGE;
 	dashboardMessage.state = D_PACKAGE_WAITING;
 	LinkedListIterator* packagesListIterator = ll_firstIterator(mothership->packageList);
-	while (ll_hasNext(packagesListIterator)) {
+	while(ll_hasNext(packagesListIterator)) {
 		Package* pkg = (Package*) ll_next(packagesListIterator);
 		dashboardMessage.number = pkg->id;
 		dashboard_sendMessage(global_dashboard, &dashboardMessage);
@@ -88,7 +88,7 @@ void mothership_launch(Mothership* mothership) {
 	unsigned int clientsNumbers = ll_getSize(mothership->clientList);
 	pthread_t clientsThreads[clientsNumbers];
 	listIterator = ll_firstIterator(mothership->clientList);
-	for (unsigned int i = 0; i < clientsNumbers; ++i) {
+	for(unsigned int i = 0; i < clientsNumbers; ++i) {
 		Client* client = ll_next(listIterator);
 		check(pthread_create(&clientsThreads[i], NULL, (void* (*)(void*)) &client_launch, (void*) client),
 		      "pthread_create failed");
@@ -99,7 +99,7 @@ void mothership_launch(Mothership* mothership) {
 	unsigned int dronesNumbers = ll_getSize(mothership->droneList);
 	pthread_t dronesThreads[dronesNumbers];
 	listIterator = ll_firstIterator(mothership->droneList);
-	for (unsigned int i = 0; i < dronesNumbers; ++i) {
+	for(unsigned int i = 0; i < dronesNumbers; ++i) {
 		Drone* drone = ll_next(listIterator);
 		drone->motherShip = mothership;
 		check(pthread_create(&dronesThreads[i], NULL, (void* (*)(void*)) &drone_launch, (void*) drone),
@@ -109,7 +109,7 @@ void mothership_launch(Mothership* mothership) {
 
 	// Send drones deliver
 	listIterator = ll_firstIterator(mothership->droneList);
-	while (ll_hasNext(listIterator)) {
+	while(ll_hasNext(listIterator)) {
 		insertAvailable(mothership, (Drone*) ll_next(listIterator));
 	}
 	ll_deleteIterator(listIterator);
@@ -117,7 +117,7 @@ void mothership_launch(Mothership* mothership) {
 	assign_drones(mothership);
 
 	// Main loop
-	while (ll_getSize(mothership->droneList) != ll_getSize(mothership->availableDrones) + mothership->deadDronesNbr) {
+	while(ll_getSize(mothership->droneList) != ll_getSize(mothership->availableDrones) + mothership->deadDronesNbr) {
 		MothershipMessage msg;
 		mq_receive(mothership->msgQueueID, (char*) &msg, sizeof(MothershipMessage), 0);
 		process_message(mothership, &msg);
@@ -127,27 +127,46 @@ void mothership_launch(Mothership* mothership) {
 
 	// Power off drone
 	listIterator = ll_firstIterator(mothership->droneList);
-	while (ll_hasNext(listIterator)) {
+	while(ll_hasNext(listIterator)) {
 		Drone* drone = ll_next(listIterator);
 		pthread_mutex_lock(&(drone->mutex));
-		if (drone->state == S_ALIVE) {
+		if(drone->state == S_ALIVE) {
 			pthread_mutex_unlock(&(drone->mutex));
 			poweroff_drone(drone);
-		}
-		else{
+		} else {
 			pthread_mutex_unlock(&(drone->mutex));
 		}
 	}
 	ll_deleteIterator(listIterator);
 
+	// Display failed packages and aware clients
+	dashboardMessage.state = D_PACKAGE_FAIL;
+	ClientMessage clientMessage;
+	clientMessage.type = MOTHERSHIP_UNABLE_TO_SEND_PACKAGE;
+	listIterator = ll_firstIterator(mothership->packageList);
+	while(ll_hasNext(listIterator)) {
+		Package* package = ll_next(listIterator);
+		dashboardMessage.number = package->id;
+		dashboard_sendMessage(global_dashboard, &dashboardMessage);
+
+		LinkedListIterator* clientIt = ll_findElement(mothership->clientList, (void*) &(package->clientID),
+		                                              &check_client);
+		if(clientIt != NULL) {
+			Client* client = (Client*) ll_getValue(clientIt);
+			client_sendMessage(client, &clientMessage);
+			ll_deleteIterator(clientIt);
+		}
+	}
+	ll_deleteIterator(listIterator);
+
 	// Join clients threads
-	for (unsigned int i = 0; i < clientsNumbers; ++i) {
+	for(unsigned int i = 0; i < clientsNumbers; ++i) {
 		check(pthread_join(clientsThreads[i], NULL), "pthread_join failed");
 		LOG_INFO("Thread %d stopped", i);
 	}
 
 	// Join drones threads
-	for (unsigned int i = 0; i < dronesNumbers; ++i) {
+	for(unsigned int i = 0; i < dronesNumbers; ++i) {
 		check(pthread_join(dronesThreads[i], NULL), "pthread_join failed");
 		LOG_INFO("Thread %d stopped", i);
 	}
@@ -157,7 +176,7 @@ void assign_drones(Mothership* mothership) {
 	unsigned int nbrDrones = ll_getSize(mothership->availableDrones);
 	if(nbrDrones > 0 && has_at_least_one_package_valid(mothership)) {
 		int i = 0;
-		while (!ll_isEmpty(mothership->availableDrones) && !ll_isEmpty(mothership->packageList) && i < nbrDrones) {
+		while(!ll_isEmpty(mothership->availableDrones) && !ll_isEmpty(mothership->packageList) && i < nbrDrones) {
 			++i;
 			Drone* first_drone_available = (Drone*) ll_getFirst(mothership->availableDrones);
 			removeAvailable(mothership, first_drone_available);
@@ -219,7 +238,7 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 			if(!drone->deliverySuccess) {
 				dashboardMessage.number = drone->package->id;
 
-				if (drone->package->numberOfTryRemaining > 0) {
+				if(drone->package->numberOfTryRemaining > 0) {
 					ll_insertSorted(mothership->packageList, drone->package,
 					                (int (*)(void*, void*)) &package_comparator);
 					drone->package = NULL;
@@ -251,7 +270,7 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 			LOG_INFO("[Mothership] Drone %03d failed", drone->id);
 
 			pthread_mutex_lock(&(drone->mutex));
-			if (drone->package->numberOfTryRemaining > 0) {
+			if(drone->package->numberOfTryRemaining > 0) {
 				--(drone->package->numberOfTryRemaining);
 			}
 			pthread_mutex_unlock(&(drone->mutex));
@@ -260,14 +279,14 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 		case DRONE_DEAD: {
 			Client* client = NULL;
 			pthread_mutex_lock(&(drone->mutex));
-			if (drone->package != NULL) {
+			if(drone->package != NULL) {
 				client = (Client*) ll_getElement(mothership->clientList, drone->package->clientID);
 				--(mothership->numberOfPackages);
 				package_free(drone->package);
 				drone->package = NULL;
 			}
 			pthread_mutex_unlock(&(drone->mutex));
-			if (client != NULL) {
+			if(client != NULL) {
 				ClientMessage clientMessage;
 				clientMessage.type = DRONE_DELIVERY_FINAL_FAILURE;
 				client_sendMessage(client, &clientMessage);
@@ -298,7 +317,8 @@ bool find_package(Mothership* mothership, Drone* drone) {
 		bool battery = false;
 		while(ll_hasNext(it) && pkg == NULL) {
 			Package* value = (Package*) ll_next(it);
-			LinkedListIterator* clientIt = ll_findElement(mothership->clientList, (void*) &(value->clientID), &check_client);
+			LinkedListIterator* clientIt = ll_findElement(mothership->clientList, (void*) &(value->clientID),
+			                                              &check_client);
 			Client* tmpClient = (Client*) ll_getValue(clientIt);
 			ll_deleteIterator(clientIt);
 
