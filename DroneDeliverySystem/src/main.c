@@ -35,7 +35,7 @@ int main() {
 	LinkedList* packageList = loadPackagesFromFile(packageFile);
 	fclose(packageFile);
 
-	FILE* droneFile = fopen("drones3.csv", "r");
+	FILE* droneFile = fopen("drones1.csv", "r");
 	if(droneFile == NULL) {
 		SLOG_ERR("Unable to find drones.csv");
 	}
