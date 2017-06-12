@@ -47,6 +47,6 @@ void drone_sendMessage(Drone* drone, DroneMessage* message);
  *
  * @return the power consumption of the drone
  */
-unsigned int computePowerConsumption(Drone* drone, Package* package, double mothershipToClientDistance);
+unsigned int computePowerConsumption(Package* package, double mothershipToClientDistance);
 
 #endif //UTBM_LO41_DRONEDELIVERYSYSTEM_DRONE_H

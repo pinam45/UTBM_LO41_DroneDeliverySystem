@@ -299,7 +299,7 @@ bool find_package(Mothership* mothership, Drone* drone) {
 			ll_deleteIterator(clientIt);
 
 			pthread_mutex_lock(&(drone->mutex));
-			battery = computePowerConsumption(drone, value, tmpClient->distance) < drone->autonomy;
+			battery = computePowerConsumption(value, tmpClient->distance) < drone->autonomy;
 
 			if(value->weight <= drone->maxLoad && value->numberOfTryRemaining != 0 && battery) {
 				pkg = value;

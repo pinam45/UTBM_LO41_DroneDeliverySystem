@@ -69,8 +69,8 @@ void drone_sendMessage(Drone* drone, DroneMessage* message) {
 	check(mq_send(drone->msgQueueID, (const char*) message, sizeof(DroneMessage), 0), "mq_send failed");
 }
 
-unsigned int computePowerConsumption(Drone* drone, Package* package, double mothershipToClientDistance) {
-	return ((unsigned int)abs((int)package->weight - (int)drone->maxLoad) / 4) + (unsigned int) mothershipToClientDistance;
+unsigned int computePowerConsumption(Package* package, double mothershipToClientDistance) {
+	return (unsigned int)package->weight + (unsigned int) mothershipToClientDistance;
 }
 
 bool process_message(Drone* drone, DroneMessage* message) {
@@ -116,7 +116,7 @@ bool process_message(Drone* drone, DroneMessage* message) {
 
 			LOG_INFO("[Drone %03d] Package", drone->id);
 			pthread_mutex_lock(&(drone->mutex));
-			unsigned int consumption = computePowerConsumption(drone, drone->package, 5);
+			unsigned int consumption = computePowerConsumption(drone->package, 5);
 			pthread_mutex_unlock(&(drone->mutex));
 
 			drone_failure(drone);
