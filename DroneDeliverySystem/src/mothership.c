@@ -175,7 +175,7 @@ void mothership_launch(Mothership* mothership) {
 void assign_drones(Mothership* mothership) {
 	unsigned int nbrDrones = ll_getSize(mothership->availableDrones);
 	if(nbrDrones > 0 && has_at_least_one_package_valid(mothership)) {
-		int i = 0;
+		unsigned int i = 0;
 		while(!ll_isEmpty(mothership->availableDrones) && !ll_isEmpty(mothership->packageList) && i < nbrDrones) {
 			++i;
 			Drone* first_drone_available = (Drone*) ll_getFirst(mothership->availableDrones);

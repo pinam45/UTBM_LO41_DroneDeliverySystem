@@ -8,9 +8,18 @@
 #include "parser.h"
 #include "util.h"
 
+#ifdef UNUSED
+#elif defined(__GNUC__)
+# define UNUSED(x) x __attribute__((unused))
+#elif defined(__LCLINT__)
+# define UNUSED(x) /*@unused@*/ x
+#else
+# define UNUSED(x) x
+#endif
+
 static void signalHandler(int signal);
 
-void signalHandler(int signal) {
+void signalHandler(int UNUSED(signal)) {
 	cc_Vector2 pos = {0, cc_getHeight() - 1};
 	cc_setCursorPosition(pos);
 	cc_setColors(BLACK, WHITE);
