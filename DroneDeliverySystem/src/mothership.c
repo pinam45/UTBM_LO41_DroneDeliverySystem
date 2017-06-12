@@ -154,8 +154,11 @@ void mothership_launch(Mothership* mothership) {
 }
 
 void assign_drones(Mothership* mothership) {
-	if(ll_getSize(mothership->availableDrones) > 0 && has_at_least_one_package_valid(mothership)) {
-		while (!ll_isEmpty(mothership->availableDrones) && !ll_isEmpty(mothership->packageList)) {
+	unsigned int nbrDrones = ll_getSize(mothership->availableDrones);
+	if(nbrDrones > 0 && has_at_least_one_package_valid(mothership)) {
+		int i = 0;
+		while (!ll_isEmpty(mothership->availableDrones) && !ll_isEmpty(mothership->packageList) && i < nbrDrones) {
+			++i;
 			Drone* first_drone_available = (Drone*) ll_getFirst(mothership->availableDrones);
 			removeAvailable(mothership, first_drone_available);
 			find_package(mothership, first_drone_available);
