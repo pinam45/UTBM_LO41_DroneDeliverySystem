@@ -70,7 +70,7 @@ void drone_sendMessage(Drone* drone, DroneMessage* message) {
 }
 
 unsigned int computePowerConsumption(Package* package, double mothershipToClientDistance) {
-	return (unsigned int)package->weight + (unsigned int) mothershipToClientDistance;
+	return package->weight + (unsigned int) mothershipToClientDistance;
 }
 
 bool process_message(Drone* drone, DroneMessage* message) {
@@ -183,7 +183,7 @@ unsigned int compute_sleep_time(Drone* drone) {
 }
 
 void drone_failure(Drone* drone) {
-	if ((rand() % 10) == 0) {
+	if ((rand() % 30) == 0) {
 		pthread_mutex_lock(&(drone->mutex));
 		drone->state = S_DEAD;
 		pthread_mutex_unlock(&(drone->mutex));
