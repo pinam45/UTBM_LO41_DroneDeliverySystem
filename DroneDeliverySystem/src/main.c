@@ -11,7 +11,11 @@
 static void signalHandler(int signal);
 
 void signalHandler(int signal) {
+	cc_Vector2 pos = {0, cc_getHeight() - 1};
+	cc_setCursorPosition(pos);
+	cc_setColors(BLACK, WHITE);
 	cc_setCursorVisibility(true);
+	cc_displayInputs(true);
 	exit(130);
 }
 
@@ -19,25 +23,26 @@ int main() {
 	srand(0);
 	signal(SIGINT, &signalHandler);
 
-	//FIXME: test start
-
 	FILE* clientsFile = fopen("clients1.csv", "r");
 	if(clientsFile == NULL) {
-		SLOG_ERR("Unable to find clients1.csv");
+		printf("ERROR: Unable to find clients1.csv\n");
+		return EXIT_FAILURE;
 	}
 	LinkedList* clientList = loadClientsFromFile(clientsFile);
 	fclose(clientsFile);
 
 	FILE* packageFile = fopen("packages1.csv", "r");
 	if(packageFile == NULL) {
-		SLOG_ERR("Unable to find packages1.csv");
+		printf("ERROR: Unable to find packages1.csv\n");
+		return EXIT_FAILURE;
 	}
 	LinkedList* packageList = loadPackagesFromFile(packageFile);
 	fclose(packageFile);
 
 	FILE* droneFile = fopen("drones1.csv", "r");
 	if(droneFile == NULL) {
-		SLOG_ERR("Unable to find drones.csv");
+		printf("ERROR: Unable to find drones1.csv\n");
+		return EXIT_FAILURE;
 	}
 	LinkedList* droneList = loadDronesFromFile(droneFile);
 	fclose(droneFile);
@@ -57,8 +62,6 @@ int main() {
 	dashboardMessage.type = D_EXIT;
 	dashboard_sendMessage(global_dashboard, &dashboardMessage);
 	check(pthread_join(dashboardThread, NULL), "pthread_join failed");
-
-	//FIXME: test end
 
 	mothership_free(mothership);
 	dashboard_free(global_dashboard);
