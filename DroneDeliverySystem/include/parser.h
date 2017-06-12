@@ -4,7 +4,7 @@
 #include "typedefs.h"
 #include "LinkedList.h"
 
-LinkedList* loadDronesFromFile(FILE* file, Mothership* ship);
+LinkedList* loadDronesFromFile(FILE* file);
 
 LinkedList* loadPackagesFromFile(FILE* file);
 

@@ -101,6 +101,7 @@ void mothership_launch(Mothership* mothership) {
 	listIterator = ll_firstIterator(mothership->droneList);
 	for (unsigned int i = 0; i < dronesNumbers; ++i) {
 		Drone* drone = ll_next(listIterator);
+		drone->motherShip = mothership;
 		check(pthread_create(&dronesThreads[i], NULL, (void* (*)(void*)) &drone_launch, (void*) drone),
 		      "pthread_create failed");
 	}

@@ -4,7 +4,7 @@
 #include "drone.h"
 #include "client.h"
 
-LinkedList* loadDronesFromFile(FILE* file, Mothership* ship) {
+LinkedList* loadDronesFromFile(FILE* file) {
 	LinkedList* list = ll_createList((void(*)(void*))&drone_free);
 
 	unsigned int id;
@@ -13,7 +13,8 @@ LinkedList* loadDronesFromFile(FILE* file, Mothership* ship) {
 	unsigned int rechargingTime;
 
 	while(fscanf(file, "%u,%u,%u,%u\n", &id, &maxLoad, &autonomy, &rechargingTime) != EOF) {
-		ll_insertLast(list, drone_constructor(id, maxLoad, autonomy, rechargingTime, ship));
+		ll_insertLast(list, drone_constructor(id, maxLoad, autonomy, rechargingTime, NULL));
+		printf("%u,%u,%u,%u\n", id, maxLoad, autonomy, rechargingTime);
 	}
 
 	return list;
