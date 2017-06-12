@@ -13,7 +13,7 @@
 #include "mothership_message.h"
 
 static bool process_message(Drone* drone, DroneMessage* message);
-
+static void drone_failure(Drone* drone);
 static unsigned int compute_sleep_time(Drone* drone);
 
 Drone* drone_constructor(unsigned int id, unsigned int maxLoad, unsigned int autonomy,
@@ -119,6 +119,8 @@ bool process_message(Drone* drone, DroneMessage* message) {
 			unsigned int consumption = computePowerConsumption(drone, drone->package, 5);
 			pthread_mutex_unlock(&(drone->mutex));
 
+			drone_failure(drone);
+
 			sleep(compute_sleep_time(drone));
 			ClientMessage clientMessage;
 			clientMessage.type = DRONE_PUT_TARGET;
@@ -154,6 +156,7 @@ bool process_message(Drone* drone, DroneMessage* message) {
 			mothership_sendMessage(drone->motherShip, &mothershipMessage);
 			client_sendMessage(drone->client, &clientMessage);
 
+			drone_failure(drone);
 			sleep(compute_sleep_time(drone));
 			pthread_mutex_lock(&(drone->mutex));
 			drone->autonomy -= consumption;
@@ -177,4 +180,33 @@ unsigned int compute_sleep_time(Drone* drone) {
 	// minus 1 to send the target message 1s before arriving
 
 	return distance > 1 ? distance / 4 : 1;
+}
+
+void drone_failure(Drone* drone) {
+	if ((rand() % 10) == 0) {
+		pthread_mutex_lock(&(drone->mutex));
+		drone->state = S_DEAD;
+		pthread_mutex_unlock(&(drone->mutex));
+
+		MothershipMessage msg;
+		msg.sender_id = drone->id;
+		msg.type = DRONE_DEAD;
+
+		mothership_sendMessage(drone->motherShip, &msg);
+
+		DashboardMessage dMsg;
+		dMsg.type = D_DRONE;
+		dMsg.state = D_DRONE_DEAD;
+		dMsg.number = drone->id;
+
+		dashboard_sendMessage(global_dashboard, &dMsg);
+		if (drone->package != NULL) {
+			dMsg.type = D_PACKAGE;
+			dMsg.state = D_PACKAGE_FAIL;
+			dMsg.number = drone->package->id;
+			dashboard_sendMessage(global_dashboard, &dMsg);
+		}
+
+		pthread_exit(0);
+	}
 }

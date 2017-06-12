@@ -1,12 +1,12 @@
 #include <stdio.h>
-#include <dashboard.h>
-#include <util.h>
 #include <signal.h>
 
 #include "typedefs.h"
+#include "dashboard.h"
 #include "drone.h"
 #include "mothership.h"
 #include "parser.h"
+#include "util.h"
 
 static void signalHandler(int signal);
 

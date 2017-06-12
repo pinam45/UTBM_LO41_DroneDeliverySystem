@@ -14,6 +14,7 @@ struct mothership {
 	LinkedList* packageList;
 	mqd_t msgQueueID;
 	size_t numberOfPackages;
+	unsigned int deadDronesNbr;
 };
 
 Mothership* mothership_constructor(LinkedList* droneList, LinkedList* clientList, LinkedList* packageList);

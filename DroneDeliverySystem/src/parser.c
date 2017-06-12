@@ -43,7 +43,6 @@ LinkedList* loadClientsFromFile(FILE* file) {
 	unsigned int id;
 	unsigned int distance;
 	unsigned int packagesToReceive;
-	unsigned int targetInstalledTime;
 
 	while(fscanf(file, "%u,%u,%u\n", &id, &distance, &packagesToReceive) != EOF) {
 		ll_insertLast(list, client_constructor(id, distance, packagesToReceive));

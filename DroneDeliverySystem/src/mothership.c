@@ -46,6 +46,7 @@ Mothership* mothership_constructor(LinkedList* droneList, LinkedList* clientList
 	mothership->clientList = clientList;
 	mothership->packageList = packageList;
 	mothership->numberOfPackages = ll_getSize(packageList);
+	mothership->deadDronesNbr = 0;
 
 	const char* buffer = "/mothership";
 	struct mq_attr attr;
@@ -115,7 +116,7 @@ void mothership_launch(Mothership* mothership) {
 	assign_drones(mothership);
 
 	// Main loop
-	while (ll_getSize(mothership->droneList) != ll_getSize(mothership->availableDrones)) {
+	while (ll_getSize(mothership->droneList) != ll_getSize(mothership->availableDrones) + mothership->deadDronesNbr) {
 		MothershipMessage msg;
 		mq_receive(mothership->msgQueueID, (char*) &msg, sizeof(MothershipMessage), 0);
 		process_message(mothership, &msg);
@@ -252,8 +253,23 @@ void process_message(Mothership* mothership, MothershipMessage* message) {
 			pthread_mutex_unlock(&(drone->mutex));
 
 			break;
-		case DRONE_DEAD:
-			ll_removeIt(droneIt);
+		case DRONE_DEAD: {
+			Client* client = NULL;
+			pthread_mutex_lock(&(drone->mutex));
+			if (drone->package != NULL) {
+				client = (Client*) ll_getElement(mothership->clientList, drone->package->clientID);
+				--(mothership->numberOfPackages);
+				package_free(drone->package);
+				drone->package = NULL;
+			}
+			pthread_mutex_unlock(&(drone->mutex));
+			if (client != NULL) {
+				ClientMessage clientMessage;
+				clientMessage.type = DRONE_DELIVERY_FINAL_FAILURE;
+				client_sendMessage(client, &clientMessage);
+			}
+			++(mothership->deadDronesNbr);
+		}
 			break;
 		default:
 			break;

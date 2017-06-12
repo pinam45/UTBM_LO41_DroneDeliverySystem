@@ -296,15 +296,16 @@ void* dashboard_launch(void* dashboard) {
 
 	Dashboard* dashboard1 = (Dashboard*) dashboard;
 	DashboardMessage dashboardMessage;
-	struct timespec time;
-	time.tv_sec = 1;
-	time.tv_nsec = 0;
+	struct timespec timeout;
+	timeout.tv_sec = time(NULL) + 1;
+	timeout.tv_nsec = 0;
 	ssize_t result;
 	bool ended = false;
 
 	while(!ended) {
-		result = mq_timedreceive(dashboard1->msgQueueID, (char*) &dashboardMessage, sizeof(DashboardMessage), 0, &time);
+		result = mq_timedreceive(dashboard1->msgQueueID, (char*) &dashboardMessage, sizeof(DashboardMessage), 0, &timeout);
 		if(result < 0) {
+			timeout.tv_sec = time(NULL) + 1;
 			if(errno != ETIMEDOUT) {
 				check((int) result, "dashboard: mq_receive failed\n");
 			} else {
