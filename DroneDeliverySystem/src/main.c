@@ -22,14 +22,14 @@ int main() {
 	//FIXME: test start
 	LinkedList* droneList = ll_createList((void(*)(void*))&drone_free);
 
-	FILE* clientsFile = fopen("Clients.txt", "r");
+	FILE* clientsFile = fopen("clients1.csv", "r");
 	if(clientsFile == NULL) {
 		SLOG_ERR("Unable to find Clients.txt");
 	}
 	LinkedList* clientList = loadClientsFromFile(clientsFile);
 	fclose(clientsFile);
 
-	FILE* packageFile = fopen("Packages.txt", "r");
+	FILE* packageFile = fopen("packages1.csv", "r");
 	if(packageFile == NULL) {
 		SLOG_ERR("Unable to find Packages.txt");
 	}
