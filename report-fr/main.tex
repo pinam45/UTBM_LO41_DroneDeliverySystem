@@ -53,6 +53,29 @@
 				\TODO{Norme POSIX magique}
 				\TODO{Prérequis: version min de gcc}
 			\subsubsection{Makefile}
+				Le \textit{Makefile} se charge de compiler d'abord la librairie \textit{ConsoleControl} puis de compiler le projet en liant cette dernière. Un \textit{Makefile} s'utilise avec le programme Make, pour plus d'informations sur Make voir \href{https://www.gnu.org/software/make/}{le site de gnu}.\\
+				Le \textit{Makefile} se configure grace aux variables définies dans les deux premières sections, la configuration de base fournie est celle pour un OS Linux standard utilisant les commandes du shell et gcc.
+				\begin{upmcaution}
+					Compiler en \textbf{debug} pour tester est déconseillé car le logeur et le dashboard vont s'afficher en même temps, rendant le tout illisible.
+				\end{upmcaution}
+				\p{Compilation}
+					Plusieurs cibles sont définies:
+					\begin{description}
+						\item[help] Affiches les cibles définit et leur effet
+						\item[silent] Cible par défaut, équivalent a \texttt{make --silent all}
+						\item[all] Compile le projet
+						\item[debug] Compile le projet en debug en activant le logeur
+						\item[clean] Supprime tous les fichiers et dossiers générés par le \textit{Makefile}
+					\end{description}
+					Pour appeler une cible:
+					\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
+$ make <cible>\end{lstlisting}
+					Pour simplement compiler le projet:
+					\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
+$ make\end{lstlisting}
+					Pour supprimer tous les fichiers et dossiers générés par le \textit{Makefile}:
+					\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
+$ make clean\end{lstlisting}
 		\subsection{Exécution}
 			\subsubsection{Paramètres}
 				\TODO{Fichiers de config a passer en paramètres}
