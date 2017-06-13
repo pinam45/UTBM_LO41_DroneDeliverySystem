@@ -2,6 +2,8 @@
 \include{packages}
 \include{settings}
 
+\newcommand{\TODO}[2][ ]{\todo[inline,color=green]{#2}}
+
 \begin{document}
 	\upmdocumentsummary{}
 	\upmdocumentauthors{}
@@ -13,10 +15,48 @@
 	%\lstlistoflistings{}
 	%\listoffigures{}
 	\newpage{}
-
-    \section{Réseau de Petri}
-
-    \mfigure[ht]{width=\linewidth}{figures/petri_drones}{}{figure:petrinet}
-
-    % TODO
+	\section{Conception}
+		\subsection{Réseau de Petri}
+			\begin{figure}[H]
+			  \centering
+			  \includegraphics[width=\textwidth]{figures/petri_drones}
+			  \caption{Réseau de Petri}
+			  \label{fig:petrinet}
+			\end{figure}
+			\TODO{Explications}
+		\subsection{Communication}
+			\subsubsection{Threads et Mutex}
+				\TODO{Threads mieux que Processus}
+				\TODO{Mutex pour éviter accès concurrents, pas utilisés pour la synchronisation}
+			\subsubsection{Files de messages}
+				\TODO{Synchronisation + aspect messages de communication}
+	\section{Réalisation}
+		\subsection{Listes}
+			\TODO{LinkedList, possibilité d'insertion triée pour colis par ordre de priorité\ldots}
+		\subsection{Structures}
+			\TODO{Fonction pour créé / alouer et supprimer / libérer, fonction pour lancer dans un thread\ldots}
+			\subsubsection{Mothership}
+			\subsubsection{Drone}
+			\subsubsection{Client}
+			\subsubsection{Package}
+		\subsection{Interface utilisateur}
+			\subsubsection{ConsoleControl}
+				\TODO{lib pour faire des UI en console}
+			\subsubsection{Tableau de bord (dashboard)}
+				\TODO{Thread avec file de messages}
+				\TODO{Affiche état de chaque acteur/élément du programme}
+				\TODO{Configurable + expliquer config actuelle}
+	\section{Utilisation}
+		\subsection{Compilation}
+			\subsubsection{Configuration}
+				\TODO{pédantic}
+				\TODO{Norme POSIX magique}
+				\TODO{Prérequis: version min de gcc}
+			\subsubsection{Makefile}
+		\subsection{Exécution}
+			\subsubsection{Paramètres}
+				\TODO{Fichiers de config a passer en paramètres}
+				\TODO{Fichiers par défaut et de test fournis}
+			\subsubsection{Tests}
+				\TODO{Valgrind}
 \end{document}
