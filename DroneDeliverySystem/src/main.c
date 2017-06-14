@@ -28,19 +28,25 @@ void signalHandler(int UNUSED(signal)) {
 	exit(130);
 }
 
-int main() {
+int main(int argc, char* argv[]) {
 	srand(0);
 	signal(SIGINT, &signalHandler);
 
-	FILE* clientsFile = fopen("clients1.csv", "r");
-	if(clientsFile == NULL) {
-		printf("ERROR: Unable to find clients1.csv\n");
-		return EXIT_FAILURE;
-	}
-	LinkedList* clientList = loadClientsFromFile(clientsFile);
-	fclose(clientsFile);
+	char files[3][255];
 
-	FILE* packageFile = fopen("packages1.csv", "r");
+	if (argc == 1) {
+		strcpy(files[0], "packages1.csv");
+		strcpy(files[1], "clients1.csv");
+		strcpy(files[2], "drones1.csv");
+	} else if (argc == 4) {
+		strcpy(files[0], argv[1]);
+		strcpy(files[1], argv[2]);
+		strcpy(files[2], argv[3]);
+	} else {
+		printf("Please read the README");
+	}
+
+	FILE* packageFile = fopen(files[0], "r");
 	if(packageFile == NULL) {
 		printf("ERROR: Unable to find packages1.csv\n");
 		return EXIT_FAILURE;
@@ -48,7 +54,15 @@ int main() {
 	LinkedList* packageList = loadPackagesFromFile(packageFile);
 	fclose(packageFile);
 
-	FILE* droneFile = fopen("drones1.csv", "r");
+	FILE* clientsFile = fopen(files[1], "r");
+	if(clientsFile == NULL) {
+		printf("ERROR: Unable to find clients1.csv\n");
+		return EXIT_FAILURE;
+	}
+	LinkedList* clientList = loadClientsFromFile(clientsFile, packageList);
+	fclose(clientsFile);
+
+	FILE* droneFile = fopen(files[2], "r");
 	if(droneFile == NULL) {
 		printf("ERROR: Unable to find drones1.csv\n");
 		return EXIT_FAILURE;

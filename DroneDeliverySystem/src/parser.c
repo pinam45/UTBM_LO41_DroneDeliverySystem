@@ -38,14 +38,24 @@ LinkedList* loadPackagesFromFile(FILE* file) {
 	return list;
 }
 
-LinkedList* loadClientsFromFile(FILE* file) {
+LinkedList* loadClientsFromFile(FILE* file, LinkedList* ptr) {
 	LinkedList* list = ll_createList((void(*)(void*))&client_free);
 
 	unsigned int id;
 	unsigned int distance;
-	unsigned int packagesToReceive;
 
-	while(fscanf(file, "%u,%u,%u\n", &id, &distance, &packagesToReceive) != EOF) {
+	while(fscanf(file, "%u,%u\n", &id, &distance) != EOF) {
+		unsigned int packagesToReceive = 0;
+
+		LinkedListIterator* it = ll_firstIterator(ptr);
+		while (ll_hasNext(it)) {
+			Package* pkg = (Package*)ll_next(it);
+			if (pkg->clientID == id) {
+				++(packagesToReceive);
+			}
+		}
+		ll_deleteIterator(it);
+
 		ll_insertLast(list, client_constructor(id, distance, packagesToReceive));
 	}
 

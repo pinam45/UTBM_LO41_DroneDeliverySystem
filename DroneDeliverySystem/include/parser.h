@@ -8,6 +8,6 @@ LinkedList* loadDronesFromFile(FILE* file);
 
 LinkedList* loadPackagesFromFile(FILE* file);
 
-LinkedList* loadClientsFromFile(FILE* file);
+LinkedList* loadClientsFromFile(FILE* file, LinkedList* ptr);
 
 #endif //UTBM_LO41_DRONEDELIVERYSYSTEM_PARSER_H
