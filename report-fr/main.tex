@@ -23,7 +23,25 @@
 			  \caption{Réseau de Petri}
 			  \label{fig:petrinet}
 			\end{figure}
-			\TODO{Explications}
+			Ce réseau de Petri décrit le problème vu du drone, pour les besoins de la
+			simulation du réseau de Petri, on a placé 60 drones étant donné qu'il y a 3
+			cas où le drone peut s'écraser. Mais dans la réalité, il n'y a qu'une très
+			petite chance que le drone est un problème technique.
+
+			Pour commencer à livrer un client, un drone et un paquet doivent être
+			disponible, une fois le drone chargé, le drone s'envole pour livrer le
+			client, on a alors trois choix disponibles, le drone peut s'écraser, le
+			client peut accepter le paquet ou le refuser, dans le cas où il accepte/refuse le
+			colis, le drone retourne vers le vaisseau mère, il peut également s'écraser
+			durant ce vol.
+
+			Dans le cas ou le drone s'écrase avec un colis, le client
+			devient un client «pas livré» car son colis n'existe plus, si le drone
+			retourne au vaisseau mère avec le colis, le colis est remis dans la liste
+			des livraisons et le drone est de nouveau disponible.
+
+			Enfin lorsque le drone est disponible, s'il n'a plus de batterie, il peut
+			aller se charger.
 		\subsection{Communication}
 			\subsubsection{Threads et Mutex}
 				\TODO{Threads mieux que Processus}
