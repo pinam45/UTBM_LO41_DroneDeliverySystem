@@ -43,11 +43,21 @@
 			Enfin lorsque le drone est disponible, s'il n'a plus de batterie, il peut
 			aller se charger.
 		\subsection{Communication}
-			\subsubsection{Threads et Mutex}
+			\subsubsection{Threads}
 				\TODO{Threads mieux que Processus}
-				\TODO{Mutex pour éviter accès concurrents, pas utilisés pour la synchronisation}
+				Dans cette implémentation il a été choisi d'utiliser des threads plutôt que des processus.
+				Cela permet en autre d'éviter la surcharge lié à l'utilisation des processus.
+				De plus les threads partagent leur espace d'adressage, ce qui permet une communication
+				plus efficace entre les différents acteurs du programme (clients, drones, vaisseau mère)
 			\subsubsection{Files de messages}
 				\TODO{Synchronisation + aspect messages de communication}
+				Les files de messages sont les éléments centraux de ce programme, en plus de permettre aux drones,
+				clients et au vaisseau mère de communiquer entre eux. Elles assurent également la synchronisation entre
+				les différents acteurs. Ainsi lorsqu'un drone à fini de se charger il va envoyer un message au vaisseau
+				mère afin de le prévenir, le vaisseau mère va alors le considérer comme disponible et lui confier un paquet
+				si les conditions sont réunis (paquet disponible, le drone peut porter le paquet...)
+			\subsubsection{Mutex}
+				\TODO{Mutex pour éviter accès concurrents, pas utilisés pour la synchronisation}
 	\section{Réalisation}
 		\subsection{Listes}
 			\TODO{LinkedList, possibilité d'insertion triée pour colis par ordre de priorité\ldots}
