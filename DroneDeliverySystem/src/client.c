@@ -79,10 +79,11 @@ void process_message(Client* client, ClientMessage* message) {
 
 	switch(message->type) {
 		case DRONE_PUT_TARGET:
-			pthread_mutex_lock(&(client->targetMutex));
 			++(client->nbrPackageFlying);
 			if (client->nbrPackageFlying == 1 && (rand() % 5) != 0) { // Sometimes the client isn't here.
+				pthread_mutex_lock(&(client->targetMutex));
 				client->targetInstalled = true;
+				pthread_mutex_unlock(&(client->targetMutex));
 
 				dashboardMessage.state = D_CLIENT_TARGET_OUT;
 				dashboard_sendMessage(global_dashboard, &dashboardMessage);
@@ -91,16 +92,16 @@ void process_message(Client* client, ClientMessage* message) {
 				dashboardMessage.state = D_CLIENT_ABSENT;
 				dashboard_sendMessage(global_dashboard, &dashboardMessage);
 			}
-			pthread_mutex_unlock(&(client->targetMutex));
+
 			LOG_INFO("Client %03d target installed", client->id);
 			break;
 		case DRONE_DELIVERY_SUCCESS:
-			pthread_mutex_lock(&(client->targetMutex));
 			--(client->nbrPackageFlying);
 			if (client->nbrPackageFlying == 0) {
+				pthread_mutex_lock(&(client->targetMutex));
 				client->targetInstalled = false;
+				pthread_mutex_unlock(&(client->targetMutex));
 			}
-			pthread_mutex_unlock(&(client->targetMutex));
 			--(client->packagesToReceive);
 
 			dashboardMessage.state = D_CLIENT_WAITING;
@@ -108,12 +109,12 @@ void process_message(Client* client, ClientMessage* message) {
 			LOG_INFO("Client %03d package received", client->id);
 			break;
 		case DRONE_DELIVERY_FAILURE:
-			pthread_mutex_lock(&(client->targetMutex));
 			--(client->nbrPackageFlying);
 			if (client->nbrPackageFlying == 0) {
+				pthread_mutex_lock(&(client->targetMutex));
 				client->targetInstalled = false;
+				pthread_mutex_unlock(&(client->targetMutex));
 			}
-			pthread_mutex_unlock(&(client->targetMutex));
 
 			dashboardMessage.state = D_CLIENT_WAITING;
 			dashboard_sendMessage(global_dashboard, &dashboardMessage);
