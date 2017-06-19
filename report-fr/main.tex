@@ -167,6 +167,17 @@
 				\begin{upmcaution}
 					Compiler en \textbf{debug} pour tester est déconseillé car le logeur et le dashboard vont s'afficher en même temps, rendant le tout illisible.
 				\end{upmcaution}
+				\paragraph*{Flags utilisé (gcc)}
+					\begin{itemize}
+						\item Flags de version POSIX:
+							\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
+-D_POSIX_C_SOURCE=200112L\end{lstlisting}
+							On définit \textit{\_POSIX\_C\_SOURCE} pour utiliser la version \textit{200112L} de la norme POSIX.
+						\item Flags de warning:
+							\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
+-pedantic -pedantic-errors -Wall -Wcast-align -Wcast-qual -Wconversion -Wdisabled-optimization -Wdouble-promotion -Wextra -Wfloat-equal -Wformat -Winit-self -Winvalid-pch -Wlogical-op -Wmain -Wmissing-declarations -Wmissing-include-dirs -Wpointer-arith -Wredundant-decls -Wshadow -Wswitch-default -Wswitch-enum -Wundef -Wuninitialized -Wunreachable-code -Wwrite-strings\end{lstlisting}
+							Pour plus d'information voir les \href{https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html}{options de warning gcc}.
+					\end{itemize}
 				\p{Compilation}
 					Plusieurs cibles sont définies:
 					\begin{description}
