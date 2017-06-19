@@ -44,29 +44,48 @@
 			aller se charger.
 		\subsection{Communication}
 			\subsubsection{Threads}
-				\TODO{Threads mieux que Processus}
 				Dans cette implémentation il a été choisi d'utiliser des threads plutôt que des processus.
 				Cela permet en autre d'éviter la surcharge lié à l'utilisation des processus.
 				De plus les threads partagent leur espace d'adressage, ce qui permet une communication
 				plus efficace entre les différents acteurs du programme (clients, drones, vaisseau mère)
 			\subsubsection{Files de messages}
-				\TODO{Synchronisation + aspect messages de communication}
 				Les files de messages sont les éléments centraux de ce programme, en plus de permettre aux drones,
 				clients et au vaisseau mère de communiquer entre eux. Elles assurent également la synchronisation entre
 				les différents acteurs. Ainsi lorsqu'un drone à fini de se charger il va envoyer un message au vaisseau
 				mère afin de le prévenir, le vaisseau mère va alors le considérer comme disponible et lui confier un paquet
 				si les conditions sont réunis (paquet disponible, le drone peut porter le paquet...)
 			\subsubsection{Mutex}
-				\TODO{Mutex pour éviter accès concurrents, pas utilisés pour la synchronisation}
+				Les mutex sont ici la pour éviter des accès concurrents, ils permettent de protéger des ressources critiques,
+				en effet, on ne protège que les variables qui sont changés par un thread et qui peuvent être lu par d'autres threads.
+
 	\section{Réalisation}
-		\subsection{Listes}
-			\TODO{LinkedList, possibilité d'insertion triée pour colis par ordre de priorité\ldots}
 		\subsection{Structures}
-			\TODO{Fonction pour créé / alouer et supprimer / libérer, fonction pour lancer dans un thread\ldots}
+			Dans ce projet, nous avons utilisé des fonctions pour créer et supprimer toutes les structures de données.
+			De plus les drones, les clients et le mothership ont une fonction permettant de lancer leur thread.
 			\subsubsection{Mothership}
+			Au début du programme le mothership détient la liste des paquets, des clients et des drones.
+			Le mothership est le thread principal du programme, c'est lui qui va lancer la simulation et par la suite va s'occuper de
+			la communication avec les drones, à la fin de la simulation, il va aussi notifier les clients que la livraison des paquets
+			restant est impossible (plus de drones disponible capable de porter les paquets restant ou l'on a essayé de livrer le paquet 3 fois).
 			\subsubsection{Drone}
+			Le drones ont tous une autonomie, une charge maximum, un temps de recharge. Ils ont également un pointeur sur le client a livrer,
+			et un pointeur sur le packet a livrer.
+			Les drones vont communiquer avec le client et le vaisseau mère, ils previennent le client lorsqu'ils arrivent à proximité pour que
+			celui-ci sorte le colis. Pour ce qui est de la communication avec le vaisseau mère, ils vont prévenir le vaisseau mère lorsqu'ils sont:
+			chargé, de retour au vaisseau, qu'ils ont reussi/raté la livraison.
+			Enfin les drones peuvent également avoir une panne technique qui fait s'écraser le drone.
 			\subsubsection{Client}
+			Le client a comme attribut princial la distance qui le sépare au vaisseau mère. Le client écoute uniquement des messages,
+			il se charge de sortir ou non (pour simuler des absences) sa cible pour que le drone puisse trouver le point d'atterissage.
+			Il reçoit également son paquet du drone.
 			\subsubsection{Package}
+			La structure package représente le colis à livrer au client, elle possède un poid, une priorité et l'identifiant du client à qui livrer le colis.
+			Les colis prioritaires sont livrés les premiers.
+			\subsubsection{Listes}
+			La liste est une liste doublement chainé, permettant de stocker les informations des différents éléments du programme.
+			Elle nous permet d'insérer la où l'on veut et notamment d'utiliser une insertion triée, ce qui permet de garder les paquets
+			triés par priorité dans la liste, de ce fait le paquet le plus prioritaire sera livré en premier sauf s'il n'y a pas de drone
+			capable de le livrer, dans le cas échéant, on essayera de livrer le paquet suivant s'il existe.
 		\subsection{Interface utilisateur}
 			\subsubsection{ConsoleControl}
 				\TODO{lib pour faire des UI en console}
