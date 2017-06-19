@@ -198,5 +198,20 @@ $ make clean\end{lstlisting}
 				\TODO{Fichiers de config a passer en paramètres}
 				\TODO{Fichiers par défaut et de test fournis}
 			\subsubsection{Tests}
-				\TODO{Valgrind}
+				On utilise l’outil de profilage Valgrind pour tester la présence de memory leaks.\\
+				On exécute la commande:
+				\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
+$ valgrind --leak-check=yes ./build/bin/UTBM_LO41_DroneDeliverySystem.elf\end{lstlisting}
+				Et on obtient:
+				\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
+==18446==
+==18446== HEAP SUMMARY:
+==18446==     in use at exit: 0 bytes in 0 blocks
+==18446==   total heap usage: 9,553 allocs, 9,553 frees, 190,043 bytes allocated
+==18446==
+==18446== All heap blocks were freed -- no leaks are possible
+==18446==
+==18446== For counts of detected and suppressed errors, rerun with: -v
+==18446== Use --track-origins=yes to see where uninitialised values come from
+==18446== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)\end{lstlisting}
 \end{document}
