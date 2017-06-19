@@ -44,7 +44,7 @@
 			aller se charger.
 		\subsection{Communication}
 			\subsubsection{Threads}
-				Dans cette implémentation il a été choisi d'utiliser des threads plutôt que des processus.
+				Dans cette implémentions il a été choisi d'utiliser des threads plutôt que des processus.
 				Cela permet entre autre d'éviter la surcharge lié à l'utilisation des processus.
 				De plus les threads partagent leur espace d'adressage, ce qui permet une communication
 				plus efficace entre les différents acteurs du programme (clients, drones, vaisseau mère).
@@ -69,20 +69,20 @@
 			restant est impossible (plus de drones disponible capable de porter les paquets restant ou l'on a essayé de livrer le paquet 3 fois).
 			\subsubsection{Drone}
 			Le drones ont tous une autonomie, une charge maximum, un temps de recharge. Ils ont également un pointeur sur le client a livrer,
-			et un pointeur sur le packet a livrer.
-			Les drones vont communiquer avec le client et le vaisseau mère, ils previennent le client lorsqu'ils arrivent à proximité pour que
+			et un pointeur sur le colis a livrer.
+			Les drones vont communiquer avec le client et le vaisseau mère, ils préviennent le client lorsqu'ils arrivent à proximité pour que
 			celui-ci sorte le colis. Pour ce qui est de la communication avec le vaisseau mère, ils vont prévenir le vaisseau mère lorsqu'ils sont:
-			chargé, de retour au vaisseau, qu'ils ont reussi/raté la livraison.
+			chargé, de retour au vaisseau, qu'ils ont réussi/raté la livraison.
 			Enfin les drones peuvent également avoir une panne technique qui fait s'écraser le drone.
 			\subsubsection{Client}
-			Le client a comme attribut princial la distance qui le sépare au vaisseau mère. Le client écoute uniquement des messages,
+			Le client a comme attribut principal la distance qui le sépare au vaisseau mère. Le client écoute uniquement des messages,
 			il se charge de sortir ou non (pour simuler des absences) sa cible pour que le drone puisse trouver le point d'atterissage.
 			Il reçoit également son paquet du drone.
 			\subsubsection{Package}
-			La structure package représente le colis à livrer au client, elle possède un poid, une priorité et l'identifiant du client à qui livrer le colis.
+			La structure package représente le colis à livrer au client, elle possède un poids, une priorité et l'identifiant du client à qui livrer le colis.
 			Les colis prioritaires sont livrés les premiers. Les colis peuvent être perdu dans le cas où le drone s'écrase en les transportant.
 			\subsubsection{Listes}
-			La liste est une liste doublement chainé, permettant de stocker les informations des différents éléments du programme.
+			La liste est une liste doublement chaînée, permettant de stocker les informations des différents éléments du programme.
 			Elle nous permet d'insérer la où l'on veut et notamment d'utiliser une insertion triée, ce qui permet de garder les paquets
 			triés par priorité dans la liste, de ce fait le paquet le plus prioritaire sera livré en premier sauf s'il n'y a pas de drone
 			capable de le livrer, dans le cas échéant, on essayera de livrer le paquet suivant s'il existe.
@@ -171,7 +171,7 @@
 					\end{itemize}
 			\subsubsection{Makefile}
 				Le \textit{Makefile} se charge de compiler d'abord la librairie \textit{ConsoleControl} puis de compiler le projet en liant cette dernière. Un \textit{Makefile} s'utilise avec le programme Make, pour plus d'informations sur Make voir \href{https://www.gnu.org/software/make/}{le site de gnu}.\\
-				Le \textit{Makefile} se configure grace aux variables définies dans les deux premières sections, la configuration de base fournie est celle pour un OS Linux standard utilisant les commandes du shell et gcc.
+				Le \textit{Makefile} se configure grâce aux variables définies dans les deux premières sections, la configuration de base fournie est celle pour un OS Linux standard utilisant les commandes du shell et gcc.
 				\begin{upmcaution}
 					Compiler en \textbf{debug} pour tester est déconseillé car le logeur et le dashboard vont s'afficher en même temps, rendant le tout illisible.
 				\end{upmcaution}
@@ -214,4 +214,21 @@ $ valgrind --leak-check=yes ./build/bin/UTBM_LO41_DroneDeliverySystem.elf\end{ls
 ==18446== For counts of detected and suppressed errors, rerun with: -v
 ==18446== Use --track-origins=yes to see where uninitialised values come from
 ==18446== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)\end{lstlisting}
+				De plus en exécutant la commande:
+				\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
+$ valgrind --tool-massif ./build/bin/UTBM_LO41_DroneDeliverySystem.elf \end{lstlisting}
+
+				Nous n'avons donc pas de memory leak durant l'exécution du programme
+				\begin{figure}[H]
+					\centering
+					\includegraphics[width=\textwidth]{figures/memory}
+					\caption{Utilisation de la ram au cours de l'exécution du programme}
+					\label{fig:MemoryUsage}
+				\end{figure}
+
+				Le premier pic local correspond à l'ouverture des fichiers de configurations,
+				et le deuxième pic local qui est le pic global correspond au lancement des threads (20,3KiB)
+				On remarquera que plus de la moitié de la ram est utilisé par le système pour ouvrir les fichiers et pour lancer les threads.
+				Cependant en utilisant des processus, une bonne partie de la ram utilisé aurait été dupliquée, ce qui aurait probablement augmenté la quantité total de
+				ram utilisée.
 \end{document}
