@@ -45,15 +45,15 @@
 		\subsection{Communication}
 			\subsubsection{Threads}
 				Dans cette implémentation il a été choisi d'utiliser des threads plutôt que des processus.
-				Cela permet en autre d'éviter la surcharge lié à l'utilisation des processus.
+				Cela permet entre autre d'éviter la surcharge lié à l'utilisation des processus.
 				De plus les threads partagent leur espace d'adressage, ce qui permet une communication
-				plus efficace entre les différents acteurs du programme (clients, drones, vaisseau mère)
+				plus efficace entre les différents acteurs du programme (clients, drones, vaisseau mère).
 			\subsubsection{Files de messages}
 				Les files de messages sont les éléments centraux de ce programme, en plus de permettre aux drones,
 				clients et au vaisseau mère de communiquer entre eux. Elles assurent également la synchronisation entre
 				les différents acteurs. Ainsi lorsqu'un drone à fini de se charger il va envoyer un message au vaisseau
 				mère afin de le prévenir, le vaisseau mère va alors le considérer comme disponible et lui confier un paquet
-				si les conditions sont réunis (paquet disponible, le drone peut porter le paquet...)
+				si les conditions sont réunis (paquet disponible, le drone peut porter le paquet\ldots).
 			\subsubsection{Mutex}
 				Les mutex sont ici la pour éviter des accès concurrents, ils permettent de protéger des ressources critiques,
 				en effet, on ne protège que les variables qui sont changés par un thread et qui peuvent être lu par d'autres threads.
@@ -88,11 +88,73 @@
 			capable de le livrer, dans le cas échéant, on essayera de livrer le paquet suivant s'il existe.
 		\subsection{Interface utilisateur}
 			\subsubsection{ConsoleControl}
-				\TODO{lib pour faire des UI en console}
+				L'interface utilisateur est entièrement en console mais emprunte beaucoup aux interfaces graphiques, elle a été réalisée avec la librairie C, \textbf{ConsoleControl} développée par Maxime Pinard, membre du groupe du projet. Le projet utilise la version 0.2 de la librairie.
+				\paragraph*{}
+					Fonctionnalités principales:
+					\begin{itemize}
+						\item Obtention d'informations sur la console (largeur, hauteur\ldots)
+						\item Positionnement du curseur
+						\item Changement des couleurs d'arrière-plan et de premier plan
+						\item Gestion des inputs
+						\item Dessin géométrique (lignes, rectangle)
+						\item Interface utilisateur:
+							\begin{itemize}
+								\item Menu
+								\item Menu d'options
+								\item Messages
+							\end{itemize}
+						\item \ldots
+					\end{itemize}
+				\paragraph*{}
+					Avantages:
+					\begin{itemize}
+						\item Pas de dépendances
+						\item Utilisé en sous module compilé en même temps que le projet
+					\end{itemize}
+				\paragraph*{}
+					Pour plus d'informations, voir \href{https://github.com/pinam45/ConsoleControl}{la page Github de la librairie}.
 			\subsubsection{Tableau de bord (dashboard)}
-				\TODO{Thread avec file de messages}
-				\TODO{Affiche état de chaque acteur/élément du programme}
-				\TODO{Configurable + expliquer config actuelle}
+				\p{Lancement}
+					Le dashboard est représenté par la structure \jclass{Dashboard}, pour faire fonctionner ce dernier il faut allouer et la structure a l'aide de la fonction \jfunc{dashboard\_constructor} et lancer la fonction \jfunc{dashboard\_launch} avec en paramètre la structure. Dans le projet le dashboard est lancer dans un thread qui lui est réservé.
+				\p{Communication}
+					Pour mettre a jour les information du dashboard un système de communication par file de messages est disponible, pour cela il suffit d'utiliser une structure \jclass{DashboardMessage} et la fonction \jfunc{dashboard\_sendMessage}. La structure \jclass{DashboardMessage} contient le type d'élément concerné (drone, paquet, client), sont identifiant (id) et son nouvel état.
+				\p{États}
+					\begin{figure}[H]
+						\centering
+						\includegraphics[width=\textwidth]{figures/UI1}
+						\caption{Interface utilisateur: en cour d’exécution}
+						\label{fig:UIrunning}
+					\end{figure}
+					Plusieurs états sont possible pour chaque type d'élément, exemples avec la figure \ref{fig:UIrunning}:
+					\begin{itemize}
+						\item Le paquet 000 a bien été livré
+						\item Le paquet 001 est en vol
+						\item Le paquet 002 est en attente d’être livré
+						\item Le drone 000 est en vol vers le client
+						\item Le drone 001 est en charge
+						\item Le drone 005 est en attente (soit il attend qu'un paquet lui soit attribué soit il attend la fin de journée car les paquets restant sont trop lourd ou les clients trop loin pour lui)
+						\item Le drone 007 est mort suite a un incident technique
+						\item Le drone 009 est en vol vers le vaisseau mère après une livraison réussie
+						\item Le client 000 est absent lors de sa livraison
+						\item Le client 001 attend sa livraison
+						\item Le client 002 a reçut tout ces paquets
+						\item Le client 019 a sortit sa cible pour l'arrivée du drone
+					\end{itemize}
+					Tout au long de l’exécution du programme les différents acteurs du programme envoient des messages au dashboard pour prévenir de leur état jusqu’à la fin du programme ou chaque acteur est dans un état terminal comme visible sur la figure \ref{fig:UIend}.
+					\begin{figure}[H]
+						\centering
+						\includegraphics[width=\textwidth]{figures/UI2}
+						\caption{Interface utilisateur: fin d’exécution}
+						\label{fig:UIend}
+					\end{figure}
+					Les états finaux sont:
+					\begin{itemize}
+						\item Pour les paquets: livraison réussit ou échouée
+						\item Pour les drones: journée finit ou mort
+						\item Pour les clients: finit avec ayant reçut tout ces paquets ou finit avec des paquets manquants (limite d'essai atteint ou détruit avec la mort d'un drone)
+					\end{itemize}
+				\p{Configuration}
+					Le dashboard est configurable, tout les messages d'état et les couleurs sont changeables. De plus le dashboard s'adapte dynamiquement a la taille de la console qui peut être redimensionnée au cour de l’exécution. En fonction de la largeur de la consule les élément s’afficheront sur 3 ou 1 colonne.
 	\section{Utilisation}
 		\subsection{Compilation}
 			\subsubsection{Configuration}
