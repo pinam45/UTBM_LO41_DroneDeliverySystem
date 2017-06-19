@@ -15,6 +15,13 @@
 	%\lstlistoflistings{}
 	%\listoffigures{}
 	\newpage{}
+	\section{Introduction}
+		Dans le cadre de l'UV LO41, nous avons du réaliser un simulateur de livraison
+		par drone. Afin de répondre à ce problème, nous avons commencé par analyser le
+		problème grâce à un réseau de Petri, puis nous avons réfléchie sur l'implémentation
+		du problème en nous posant des questions sur la communications entre les différents
+		acteurs du système de livraison. Après cela, nous avons commencé l'implémentation et
+		nous avons fini par analyser les performances de notre programme.
 	\section{Conception}
 		\subsection{Réseau de Petri}
 			\begin{figure}[H]
@@ -231,4 +238,11 @@ $ valgrind --tool-massif ./build/bin/UTBM_LO41_DroneDeliverySystem.elf \end{lstl
 				On remarquera que plus de la moitié de la ram est utilisé par le système pour ouvrir les fichiers et pour lancer les threads.
 				Cependant en utilisant des processus, une bonne partie de la ram utilisé aurait été dupliquée, ce qui aurait probablement augmenté la quantité total de
 				ram utilisée.
+
+	\section{Conclusion}
+		Ce projet nous a permis d'approfondir nos connaissances sur la programmation système sous Linux, et de manière générale
+		sous Unix grâce à l'utilisation de la norme POSIX qui nous permet d'avoir un programme plus multiplateforme et plus moderne
+		dans la conception de l'API.
+
+		Enfin, nous avons également eu l'occasion d'analyser notre projet après sa réalisation.
 \end{document}
