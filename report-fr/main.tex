@@ -202,8 +202,22 @@ $ make\end{lstlisting}
 $ make clean\end{lstlisting}
 		\subsection{Exécution}
 			\subsubsection{Paramètres}
-				\TODO{Fichiers de config a passer en paramètres}
-				\TODO{Fichiers par défaut et de test fournis}
+				\paragraph*{}
+					Les drones, paquets et clients utilisé par le programme sont changeables, ils sont décrit dans des fichiers au format \textit{csv}. Si aucun n'arguments n'est passé au programme a son exécution les fichier par défaut (\textit{packages1.csv}, \textit{drones1.csv}, \textit{clients1.csv}) seront utilisés.
+				\paragraph*{}
+					Pour lancer le programme avec les fichiers par défault:
+					\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
+$ ./build/bin/UTBM_LO41_DroneDeliverySystem.elf\end{lstlisting}
+					Pour lancer le programme avec des autres fichiers:
+					\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
+$ ./build/bin/UTBM_LO41_DroneDeliverySystem.elf PACKAGES_FILE CLIENT_FILE DRONE_FILE\end{lstlisting}
+				\paragraph*{}
+					3 groupes de fichiers de configurations de test sont fournis:
+					\begin{enumerate}
+						\item \textit{packages1.csv}, \textit{drones1.csv}, \textit{clients1.csv}
+						\item \textit{packages2.csv}, \textit{drones2.csv}, \textit{clients2.csv}
+						\item \textit{packages3.csv}, \textit{drones3.csv}, \textit{clients3.csv}
+					\end{enumerate}
 			\subsubsection{Tests}
 				On utilise l’outil de profilage Valgrind pour tester la présence de memory leaks.\\
 				On exécute la commande:
