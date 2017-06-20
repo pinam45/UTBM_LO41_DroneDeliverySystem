@@ -185,6 +185,14 @@
 			\subsubsection{Configuration}
 				\paragraph*{Flags utilisé (gcc)}
 					\begin{itemize}
+						\item Flags de version du standard:
+							\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
+-std=c11\end{lstlisting}
+							Le projet utilise le standard \textit{ISO/IEC 9899:2011}, aussi connu sous le nom \textit{C11}.
+						\item Flags de linkage des librairies:
+							\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
+-lConsoleControl -pthread -lrt\end{lstlisting}
+							Le projet utilise la librairie \textit{ConsoleControl}, les thread POSIX de la librairie pthread et les files de message POSIX de la librairie \textit{rt} (POSIX.1b Realtime Extension).
 						\item Flags de version POSIX:
 							\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
 -D_POSIX_C_SOURCE=200112L\end{lstlisting}
