@@ -2,8 +2,6 @@
 \include{packages}
 \include{settings}
 
-\newcommand{\TODO}[2][ ]{\todo[inline,color=green]{#2}}
-
 \begin{document}
 	\upmdocumentsummary{}
 	\upmdocumentauthors{}
@@ -15,13 +13,14 @@
 	%\lstlistoflistings{}
 	%\listoffigures{}
 	\newpage{}
-	\section{Introduction}
-		Dans le cadre de l'UV LO41, nous avons du réaliser un simulateur de livraison
-		par drone. Afin de répondre à ce problème, nous avons commencé par analyser le
-		problème grâce à un réseau de Petri, puis nous avons réfléchie sur l'implémentation
-		du problème en nous posant des questions sur la communications entre les différents
-		acteurs du système de livraison. Après cela, nous avons commencé l'implémentation et
-		nous avons fini par analyser les performances de notre programme.
+	\section*{Introduction}\addcontentsline{toc}{section}{Introduction}
+		\paragraph*{}
+			Dans le cadre de l'UV LO41, nous devions réaliser un simulateur de livraison
+			par drone inspiré de celui que Amazon essaye de mettre en place. Afin de répondre à ce problème, nous avons commencé par analyser le
+			problème grâce à un réseau de Petri, par la suite nous avons réfléchis sur l'implémentation
+			du problème en nous posant des questions sur la communications entre les différents
+			acteurs du système de livraison. Après cela, nous avons réalisé l'implémentation et
+			 avons fini par une analyse des performances de notre programme.
 	\section{Conception}
 		\subsection{Réseau de Petri}
 			\begin{figure}[H]
