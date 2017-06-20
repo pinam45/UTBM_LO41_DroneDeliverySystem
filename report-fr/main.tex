@@ -55,20 +55,23 @@
 				aller se charger.
 		\subsection{Communication}
 			\subsubsection{Threads}
-				Dans cette implémentions il a été choisi d'utiliser des threads plutôt que des processus.
-				Cela permet entre autre d'éviter la surcharge lié à l'utilisation des processus.
-				De plus les threads partagent leur espace d'adressage, ce qui permet une communication
-				plus efficace entre les différents acteurs du programme (clients, drones, vaisseau mère).
+				\paragraph*{}
+					Dans cette implémentions il a été choisi d'utiliser des threads plutôt que des processus.
+					Cela permet entre autre d'éviter la surcharge lié à l'utilisation des processus.
+					De plus les threads partagent leur espace d'adressage, ce qui permet une communication
+					plus efficace entre les différents acteurs du programme (clients, drones, vaisseau mère).
 			\subsubsection{Files de messages}
-				Les files de messages sont les éléments centraux de ce programme, en plus de permettre aux drones,
-				clients et au vaisseau mère de communiquer entre eux. Elles assurent également la synchronisation entre
-				les différents acteurs. Ainsi lorsqu'un drone à fini de se charger il va envoyer un message au vaisseau
-				mère afin de le prévenir, le vaisseau mère va alors le considérer comme disponible et lui confier un paquet
-				si les conditions sont réunis (paquet disponible, le drone peut porter le paquet\ldots).
+				\paragraph*{}
+					Les files de messages sont les éléments centraux de ce programme, en plus de permettre aux drones,
+					clients et au vaisseau mère de communiquer entre eux. Elles assurent également la synchronisation entre
+					les différents acteurs. Par exemple lorsqu'un drone à fini de se charger il va envoyer un message au vaisseau
+					mère afin de le prévenir puis se mettre en attente de la réception d'un message lui indiquant quoi faire. Le vaisseau mère a la réception
+					du message va alors considérer le drone comme disponible et lui confier un paquet si les conditions sont réunies
+					(paquet disponible, le drone peut porter le paquet\ldots) et lui envoyer un message pour lui dire de partir livrer le client.
 			\subsubsection{Mutex}
-				Les mutex sont ici la pour éviter des accès concurrents, ils permettent de protéger des ressources critiques,
-				en effet, on ne protège que les variables qui sont changés par un thread et qui peuvent être lu par d'autres threads.
-
+				\paragraph*{}
+					Les mutex sont utilisés pour éviter des accès concurrents, ils permettent de protéger des ressources critiques,
+					en effet, on ne protège que les variables qui sont changés par un thread et qui peuvent être lu par d'autres threads.
 	\section{Réalisation}
 		\subsection{Structures}
 			Dans ce projet, nous avons utilisé des fonctions pour créer et supprimer toutes les structures de données.
