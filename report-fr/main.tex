@@ -245,12 +245,13 @@ $ ./build/bin/UTBM_LO41_DroneDeliverySystem.elf PACKAGES_FILE CLIENT_FILE DRONE_
 						\item \textit{packages3.csv}, \textit{drones3.csv}, \textit{clients3.csv}
 					\end{enumerate}
 			\subsubsection{Tests}
-				On utilise l’outil de profilage Valgrind pour tester la présence de memory leaks.\\
-				On exécute la commande:
-				\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
+				\p{Memory leaks}
+					On utilise l’outil de profilage Valgrind pour tester la présence de memory leaks.\\
+					On exécute la commande:
+					\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
 $ valgrind --leak-check=yes ./build/bin/UTBM_LO41_DroneDeliverySystem.elf\end{lstlisting}
-				Et on obtient:
-				\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
+					Et on obtient:
+					\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
 ==18446==
 ==18446== HEAP SUMMARY:
 ==18446==     in use at exit: 0 bytes in 0 blocks
@@ -261,28 +262,29 @@ $ valgrind --leak-check=yes ./build/bin/UTBM_LO41_DroneDeliverySystem.elf\end{ls
 ==18446== For counts of detected and suppressed errors, rerun with: -v
 ==18446== Use --track-origins=yes to see where uninitialised values come from
 ==18446== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)\end{lstlisting}
-				De plus en exécutant la commande:
-				\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
+					Nous n'avons donc pas de memory leak durant l'exécution du programme.
+				\p{Utilisation de la mémoire RAM}
+					De plus en exécutant la commande:
+					\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
 $ valgrind --tool-massif ./build/bin/UTBM_LO41_DroneDeliverySystem.elf \end{lstlisting}
-
-				Nous n'avons donc pas de memory leak durant l'exécution du programme
-				\begin{figure}[H]
-					\centering
-					\includegraphics[width=\textwidth]{figures/memory}
-					\caption{Utilisation de la ram au cours de l'exécution du programme}
-					\label{fig:MemoryUsage}
-				\end{figure}
-
-				Le premier pic local correspond à l'ouverture des fichiers de configurations,
-				et le deuxième pic local qui est le pic global correspond au lancement des threads (20,3KiB)
-				On remarquera que plus de la moitié de la ram est utilisé par le système pour ouvrir les fichiers et pour lancer les threads.
-				Cependant en utilisant des processus, une bonne partie de la ram utilisé aurait été dupliquée, ce qui aurait probablement augmenté la quantité total de
-				ram utilisée.
-
-	\section{Conclusion}
-		Ce projet nous a permis d'approfondir nos connaissances sur la programmation système sous Linux, et de manière générale
-		sous Unix grâce à l'utilisation de la norme POSIX qui nous permet d'avoir un programme plus multiplateforme et plus moderne
-		dans la conception de l'API.
-
-		Enfin, nous avons également eu l'occasion d'analyser notre projet après sa réalisation.
+					On obtient le graphique de le figure \ref{fig:MemoryUsage}.
+					\begin{figure}[H]
+						\centering
+						\includegraphics[width=\textwidth]{figures/memory}
+						\caption{Utilisation de la mémoire RAM au cours de l'exécution du programme}
+						\label{fig:MemoryUsage}
+					\end{figure}
+					\paragraph*{}
+						Le premier pic local correspond à l'ouverture des fichiers de configurations,
+						et le deuxième pic local qui est le pic global correspond au lancement des threads (20,3KiB)
+						On remarquera que plus de la moitié de la ram est utilisé par le système pour ouvrir les fichiers et pour lancer les threads.
+						Cependant en utilisant des processus, une bonne partie de la ram utilisé aurait été dupliquée, ce qui aurait probablement augmenté la quantité total de
+						ram utilisée.
+	\section*{Conclusion}\addcontentsline{toc}{section}{Conclusion}
+		\paragraph*{}
+			Ce projet nous a permis d'approfondir nos connaissances sur la programmation système sous Linux, et de manière générale
+			sous Unix grâce à l'utilisation de la norme POSIX qui nous permet d'avoir un programme plus multiplateforme et plus moderne
+			dans la conception de l'API.
+		\paragraph*{}
+			Enfin, nous avons également eu l'occasion d'analyser notre projet après sa réalisation pour juger de l'efficacité des outils fournis par le système.
 \end{document}
