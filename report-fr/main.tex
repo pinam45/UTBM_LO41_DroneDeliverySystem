@@ -15,7 +15,7 @@
 	\newpage{}
 	\section*{Introduction}\addcontentsline{toc}{section}{Introduction}
 		\paragraph*{}
-			Dans le cadre de l'UV LO41, nous devions réaliser un simulateur de livraison par drone inspiré de celui qu’Amazon essaye de mettre en place. Afin de répondre à ce problème, nous avons commencé par analyser le problème grâce à un réseau de Petri, par la suite nous avons réfléchis sur l'implémentation du problème en nous posant des questions sur la communication entre les différents acteurs du système de livraison. Après cela, nous avons réalisé l'implémentation et avons fini par une analyse des performances de notre programme.
+			Dans le cadre de l'UV LO41, nous devions réaliser un simulateur de livraison par drone, inspiré par le système d'Amazon. Afin de répondre à ce problème, nous avons commencé par analyser le problème grâce à un réseau de Petri, par la suite nous avons réfléchi sur l'implémentation du problème en nous posant des questions sur la communication entre les différents acteurs du système de livraison. Enfin, nous avons réalisé l'implémentation et avons fini par une analyse des performances de notre programme.
 	\section{Conception}
 		\subsection{Réseau de Petri}
 			\begin{figure}[H]
@@ -33,7 +33,7 @@
 					\item Le client accepte le paquet
 					\item Le client refuse le paquet
 				\end{itemize}
-				Dans les cas où le client accepte ou refuse le colis, le drone retourne vers le vaisseau mère, il peut également s'écraser	durant ce vol retour.
+				Dans les cas où le client accepte ou refuse le colis, le drone retourne vers le vaisseau mère, il peut également s'écraser durant ce vol retour.
 			\paragraph*{}
 				Dans le cas où le drone s'écrase avec un colis, le client devient un client ``pas livré'' car son colis n'existe plus, si le drone retourne au vaisseau mère avec le colis, le colis est remis dans la liste des livraisons et le drone est de nouveau disponible.
 			\paragraph*{}
@@ -41,20 +41,20 @@
 		\subsection{Communication}
 			\subsubsection{Threads}
 				\paragraph*{}
-					Dans cette implémentions il a été choisi d'utiliser des threads plutôt que des processus. Cela permet entre autre d'éviter la surcharge lié à l'utilisation des processus. De plus les threads partagent leur espace d'adressage, ce qui permet une communication plus efficace entre les différents acteurs du programme (clients, drones, vaisseau mère).
+					Dans cette implémentions il a été choisi d'utiliser des threads plutôt que des processus. Cela permet entre autres d'éviter la surcharge lié à l'utilisation des processus. De plus les threads partagent leur espace d'adressage, ce qui permet une communication plus efficace entre les différents acteurs du programme (clients, drones, vaisseau mère).
 			\subsubsection{Files de messages}
 				\paragraph*{}
-					Les files de messages sont les éléments centraux de ce programme, en plus de permettre aux drones, clients et au vaisseau mère de communiquer entre eux. Elles assurent également la synchronisation entre les différents acteurs. Par exemple lorsqu'un drone à fini de se charger il va envoyer un message au vaisseau mère afin de le prévenir puis se mettre en attente de la réception d'un message lui indiquant quoi faire. Le vaisseau mère a la réception du message va alors considérer le drone comme disponible et lui confier un paquet si les conditions sont réunies (paquet disponible, le drone peut porter le paquet\ldots) et lui envoyer un message pour lui dire de partir livrer le client.
+					Les files de messages sont les éléments centraux de ce programme, en plus de permettre aux drones, clients et au vaisseau mère de communiquer. Elles assurent également la synchronisation entre les différents acteurs. Par exemple lorsqu'un drone à fini de se charger il va envoyer un message au vaisseau mère afin de le prévenir puis se mettre en attente de la réception d'un message lui indiquant quoi faire. Le vaisseau mère à la réception du message va alors considérer le drone comme disponible et lui confier un paquet si les conditions sont réunies (paquet disponible, le drone peut porter le paquet\ldots) et le cas échéant lui envoyer un message pour lui dire de partir livrer le client.
 			\subsubsection{Mutex}
 				\paragraph*{}
-					Les mutex sont utilisés pour éviter des accès concurrents, ils permettent de protéger des ressources critiques, en effet, on ne protège que les variables qui sont changés par un thread et qui peuvent être lu par d'autres threads.
+					Les mutex sont utilisés pour éviter des accès concurrents, ils permettent de protéger des ressources critiques, on ne protège que les variables qui sont changés par un thread et qui peuvent être lu par d'autres threads.
 	\section{Réalisation}
 		\subsection{Structures}
 			\paragraph*{}
 				Dans ce projet, nous avons réalisé des fonctions qui prennent en charge la création et la suppression des différentes structures de données. Ceci afin de rendre le code plus lisible et d'éviter toute fuite de mémoire du a une structure mal libérée. De plus les drones, les clients, le mothership et le dashboard ont une fonction permettant de les lancer dans un thread.
 			\subsubsection{Mothership}
 				\paragraph*{}
-					Au début du programme le mothership détient la liste des paquets, des clients et des drones. Le mothership est le thread principal du programme, c'est lui qui va lancer la simulation et par la suite va s'occuper de la communication avec les drones, à la fin de la simulation, il va aussi notifier les clients que la livraison des paquets restant est impossible (plus de drones disponible capable de porter les paquets restant ou l'on a essayé de livrer le paquet 3 fois). Puis il prévenir tous les drones encore vivant de la fin de la journée de livraison avant de rentrer à la base, c'est à dire mettre fin à la simulation de livraison.
+					Au début du programme le mothership détient la liste des paquets, des clients et des drones. Le mothership est le thread principal et élément central du programme, c'est lui qui va lancer la simulation et par la suite va s'occuper de la communication avec les drones, à la fin de la simulation, il va aussi notifier les clients que la livraison des paquets restant est impossible (plus de drones disponible capable de porter les paquets restant ou l'on a essayé de livrer le paquet 3 fois). Puis il va prévenir tous les drones encore vivant de la fin de la journée de livraison avant de rentrer à la base, c'est à dire mettre fin à la simulation de livraison.
 			\subsubsection{Drone}
 				\paragraph*{}
 					Les drones ont tous une autonomie, une charge maximum et un temps de recharge. Ils ont également un pointeur sur le client à livrer, et un pointeur sur le colis à livrer.
@@ -102,14 +102,14 @@
 					Pour plus d'informations, voir \href{https://github.com/pinam45/ConsoleControl}{la page Github de la librairie}.
 			\subsubsection{Tableau de bord (dashboard)}
 				\p{Lancement}
-					Le dashboard est représenté par la structure \jclass{Dashboard}, pour faire fonctionner ce dernier il faut allouer et la structure a l'aide de la fonction \jfunc{dashboard\_constructor} et lancer la fonction \jfunc{dashboard\_launch} avec en paramètre la structure. Dans le projet le dashboard est lancé dans un thread qui lui est réservé.
+					Le dashboard est représenté par la structure \jclass{Dashboard}, pour faire fonctionner ce dernier il faut allouer la structure à l'aide de la fonction \jfunc{dashboard\_constructor} et lancer la fonction \jfunc{dashboard\_launch} avec en paramètre la structure. Dans le projet le dashboard est lancé dans un thread qui lui est réservé.
 				\p{Communication}
-					Pour mettre a jour les information du dashboard un système de communication par file de messages est disponible, pour cela il suffit d'utiliser une structure \jclass{DashboardMessage} et la fonction \jfunc{dashboard\_sendMessage}. La structure \jclass{DashboardMessage} contient le type d'élément concerné (drone, paquet, client), sont identifiant (id) et son nouvel état.
+					Pour mettre à jour les informations du dashboard un système de communication par file de messages à été mis en place, pour cela il suffit d'utiliser une structure \jclass{DashboardMessage} et la fonction \jfunc{dashboard\_sendMessage}. La structure \jclass{DashboardMessage} contient l'acteur concerné (drone, paquet, client), sont identifiant (id) et son nouvel état.
 				\p{États}
 					\begin{figure}[H]
 						\centering
 						\includegraphics[width=\textwidth]{figures/UI1}
-						\caption{Interface utilisateur: en cour d’exécution}
+						\caption{Interface utilisateur: en cours d’exécution}
 						\label{fig:UIrunning}
 					\end{figure}
 					Plusieurs états sont possible pour chaque type d'élément, exemples avec la figure \ref{fig:UIrunning}:
@@ -120,7 +120,7 @@
 						\item Le drone 000 est en vol vers le client
 						\item Le drone 001 est en charge
 						\item Le drone 005 est en attente (soit il attend qu'un paquet lui soit attribué soit il attend la fin de journée car les paquets restant sont trop lourd ou les clients trop loin pour lui)
-						\item Le drone 007 est mort suite a un incident technique
+						\item Le drone 007 s'est écrasé suite a un incident technique
 						\item Le drone 009 est en vol vers le vaisseau mère après une livraison réussie
 						\item Le client 000 est absent lors de sa livraison
 						\item Le client 001 attend sa livraison
@@ -136,9 +136,9 @@
 					\end{figure}
 					Les états finaux sont:
 					\begin{itemize}
-						\item Pour les paquets: livraison réussit ou échouée
-						\item Pour les drones: journée finit ou mort
-						\item Pour les clients: finit avec ayant reçu tous ces paquets ou finit avec des paquets manquants (limite d'essai atteint ou détruit avec la mort d'un drone)
+						\item Pour les paquets: livraison réussi ou échouée
+						\item Pour les drones: journée finie ou mort
+						\item Pour les clients: fini en ayant reçu tous ses paquets ou fini avec des paquets manquants (limite d'essai atteinte ou détruit avec la mort d'un drone)
 					\end{itemize}
 				\p{Configuration}
 					Le dashboard est configurable, tous les messages d'état et les couleurs sont changeables. De plus le dashboard s'adapte dynamiquement à la taille de la console qui peut être redimensionnée au cours de l’exécution. En fonction de la largeur de la console les éléments s’afficheront sur 3 ou 1 colonne.
@@ -173,7 +173,7 @@
 				\p{Compilation}
 					Plusieurs cibles sont définies:
 					\begin{description}
-						\item[help] Affiches les cibles définit et leur effet
+						\item[help] Affiches les cibles définis et leur effet
 						\item[silent] Cible par défaut, équivalent a \texttt{make --silent all}
 						\item[all] Compile le projet
 						\item[debug] Compile le projet en debug en activant le logeur
@@ -191,7 +191,7 @@ $ make clean\end{lstlisting}
 		\subsection{Exécution}
 			\subsubsection{Paramètres}
 				\paragraph*{}
-					Les drones, paquets et clients utilisé par le programme sont changeables, ils sont décrit dans des fichiers au format \textit{csv}. Si aucun n'arguments n'est passé au programme a son exécution les fichier par défaut (\textit{packages1.csv}, \textit{drones1.csv}, \textit{clients1.csv}) seront utilisés.
+					Les drones, paquets et clients utilisé par le programme sont changeables, ils sont décrit dans des fichiers au format \textit{csv}. Si aucun argument n'est spécifié alors le programme utilisera les fichier par défaut (\textit{packages1.csv}, \textit{drones1.csv}, \textit{clients1.csv}).
 				\paragraph*{}
 					Pour lancer le programme avec les fichiers par défault:
 					\begin{lstlisting}[breaklines=true,breakatwhitespace=true,breakindent=0pt,columns=fixed,keepspaces=true,frame=single,basicstyle=\footnotesize\sffamily]
@@ -240,7 +240,7 @@ $ valgrind --tool-massif ./build/bin/UTBM_LO41_DroneDeliverySystem.elf \end{lstl
 						Le premier pic local correspond à l'ouverture des fichiers de configurations, et le deuxième pic local qui est le pic global correspond au lancement des threads (20,3KiB) On remarquera que plus de la moitié de la ram est utilisé par le système pour ouvrir les fichiers et pour lancer les threads. Cependant en utilisant des processus, une bonne partie de la RAM utilisée aurait été dupliquée, ce qui aurait probablement augmenté la quantité total de RAM utilisée.
 	\section*{Conclusion}\addcontentsline{toc}{section}{Conclusion}
 		\paragraph*{}
-			Ce projet nous a permis d'approfondir nos connaissances sur la programmation système sous Linux, et de manière générale sous Unix grâce à l'utilisation de la norme POSIX qui nous permet d'avoir un programme plus multiplateforme et plus moderne dans la conception de l'API.
+			Ce projet nous a permis d'approfondir nos connaissances sur la programmation système sous Linux, et de manière générale sous Unix grâce à l'utilisation de la norme POSIX 2011 qui nous a permis d'avoir un programme plus multiplateforme et moderne dans les librairies utilisées.
 		\paragraph*{}
 			Enfin, nous avons également eu l'occasion d'analyser notre projet après sa réalisation pour juger de l'efficacité des outils fournis par le système.
 \end{document}
