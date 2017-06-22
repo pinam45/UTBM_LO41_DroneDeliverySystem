@@ -18,3 +18,20 @@ On peut ainsi changer les colis, les drones et les clients.
 
 On exécutera alors la commande suivante './build/bin/UTBM\_LO41\_DroneDeliverySystem.elf PACKAGES\_FILE CLIENT\_FILE DRONE\_FILE'
 
+## Comment éditer les fichiers de configuration ##
+
+### Fichier package ###
+
+Les colis sont représentés comme il suit:
+
+Identifieur unique aux colis, priorité, poid, Identifieur du client, Nombre d'essais maximum
+
+### Fichier drone ###
+
+Les drones sont représentés comme il suit:
+
+Identifieur unique aux drones, charge maximum, autonomie, temps de recharge
+
+### Fichier client ###
+
+Identifieur unique aux clients, distance au vaisseau mère
