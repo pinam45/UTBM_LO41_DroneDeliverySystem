@@ -34,4 +34,6 @@ Identifieur unique aux drones, charge maximum, autonomie, temps de recharge
 
 ### Fichier client ###
 
+Les clients sont représentés comme il suit:
+
 Identifieur unique aux clients, distance au vaisseau mère
