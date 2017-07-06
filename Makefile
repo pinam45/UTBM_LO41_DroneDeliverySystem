@@ -31,9 +31,9 @@ LIB_MAKE_ROOT     = ConsoleControl
 LIB_OUTPUT_DIR    = ConsoleControl/build/lib
 FILEIDENTIFIER    = .c
 COMPILER          = gcc
-COMPFLAGS         = -pedantic -Wall -Wcast-align -Wcast-qual -Wconversion -Wdisabled-optimization -Wdouble-promotion -Wextra -Wfloat-equal -Wformat -Winit-self -Winvalid-pch -Wlogical-op -Wmain -Wmissing-declarations -Wmissing-include-dirs -Wpointer-arith -Wredundant-decls -Wshadow -Wswitch-default -Wswitch-enum -Wundef -Wuninitialized -Wunreachable-code -Wwrite-strings
+COMPFLAGS         = -D_POSIX_C_SOURCE=200112L -pedantic -pedantic-errors -Wall -Wcast-align -Wcast-qual -Wconversion -Wdisabled-optimization -Wdouble-promotion -Wextra -Wfloat-equal -Wformat -Winit-self -Winvalid-pch -Wlogical-op -Wmain -Wmissing-declarations -Wmissing-include-dirs -Wpointer-arith -Wredundant-decls -Wshadow -Wswitch-default -Wswitch-enum -Wundef -Wuninitialized -Wunreachable-code -Wwrite-strings
 COMPSTANDARD      = -std=c11
-LINKS             = -lConsoleControl
+LINKS             = -lConsoleControl -pthread -lrt
 DBARGS            = -g -DDEBUG -DLOGGER_ENABLED
 
 BUILDDIR          = build/
